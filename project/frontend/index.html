@@ -1,14 +1,23 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
-
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <title>レシピ材料リスト生成</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    
+  <div class="container">
+    <h1>レシピ材料検索</h1>
+    <p>作りたい料理を入力してください。複数料理もOK！</p>
+
+    <textarea id="recipeInput" placeholder="例: カレーとサラダ"></textarea>
+    <button id="searchButton">検索</button>
+
+    <div id="loading" class="hidden">🔄 検索中...</div>
+    <div id="error" class="error"></div>
+    <div id="result"></div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
