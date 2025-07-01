@@ -1,69 +1,87 @@
-body {
-  font-family: sans-serif;
-  background-color: #f9f9f9;
-  color: #333;
-}
+:root {
+    --base-color: #ffffff;
+    --main-color: #F68F66;
+    --accent-color: #798455;
+    --text-color: #333a46;
+    --subtle-bg: #e9e8d9;
+  }
 
-.container {
-  max-width: 600px;
-  margin: 30px auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-h1 {
-  text-align: center;
-  color: #4CAF50;
-}
-
-textarea {
-  width: 100%;
-  height: 100px;
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-button {
-  padding: 10px 20px;
-  margin-top: 10px;
-  font-size: 16px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #45a049;
-}
-
-#loading {
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-.hidden {
-  display: none;
-}
-
-#error {
-  color: red;
-  margin-top: 10px;
-}
-
-#result {
-  margin-top: 20px;
-}
-
-#result ul {
-  padding-left: 20px;
-}
-
-#result li {
-  margin-bottom: 5px;
-}
+  
+  body {
+    font-family: sans-serif;
+    background-color: var(--base-color);
+    color: var(--text-color);
+  }
+  
+  .container {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 20px;
+    background: var(--base-color);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    border: 1px solid var(--subtle-bg);
+  }
+  
+  h1 {
+    text-align: center;
+    color: var(--accent-color);
+    margin-bottom: 10px;
+  }
+  
+  textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid var(--accent-color);
+    background-color: var(--subtle-bg);
+    color: var(--text-color);
+  }
+  
+  button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    font-size: 16px;
+    background-color: var(--main-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #e67e58; /* 濃いめのコーラル */
+  }
+  
+  #loading {
+    margin-top: 10px;
+    font-weight: bold;
+    color: var(--accent-color);
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  #error {
+    color: red;
+    margin-top: 10px;
+  }
+  
+  #result {
+    margin-top: 20px;
+    background-color: var(--subtle-bg);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  #result ul {
+    padding-left: 20px;
+  }
+  
+  #result li {
+    margin-bottom: 5px;
+  }
