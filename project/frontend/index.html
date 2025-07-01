@@ -2,21 +2,75 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>レシピ材料リスト生成</title>
+  <title>レシピ支援アプリ</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>レシピ材料検索</h1>
-    <p>作りたい料理を入力してください。複数料理もOK！</p>
 
-    <textarea id="recipeInput" placeholder="例: カレーとサラダ"></textarea>
-    <button id="searchButton">検索</button>
+  <!-- ───── ヘッダー + ハンバーガー ───── -->
+  <header>
+    <span class="logo">🍳 Recipe Helper</span>
+    <button id="menuBtn" aria-label="menu">☰</button>
+  </header>
 
-    <div id="loading" class="hidden">🔄 検索中...</div>
-    <div id="error" class="error"></div>
-    <div id="result"></div>
-  </div>
+  <!-- ───── ドロワーナビ ───── -->
+  <aside id="drawer" class="drawer">
+    <nav>
+      <a href="#home"      class="nav-link">ホーム</a>
+      <a href="#search"    class="nav-link">材料検索</a>
+      <a href="#list"      class="nav-link">買い物リスト</a>
+      <a href="#inventory" class="nav-link">冷蔵庫在庫</a>
+    </nav>
+  </aside>
+  <div id="overlay" class="overlay hidden"></div>
+
+  <!-- ───── ① ホーム ───── -->
+  <section id="home" class="page">
+    <div class="container">
+      <h1>レシピ支援アプリ</h1>
+      <p>使いたい機能を選んでください。</p>
+      <div class="home-grid">
+        <a href="#search"    class="home-card">材料検索</a>
+        <a href="#list"      class="home-card">買い物リスト</a>
+        <a href="#inventory" class="home-card">冷蔵庫在庫</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── ② 材料検索 ───── -->
+  <section id="search" class="page hidden">
+    <div class="container">
+      <h1>材料を検索</h1>
+      <textarea id="recipeInput" placeholder="例: カレーとサラダ"></textarea>
+      <button id="searchButton">検索</button>
+      <button id="addListButton" class="hidden">買い物リストに追加</button>
+      <div id="loading" class="hidden">🔄 検索中...</div>
+      <div id="error" class="error"></div>
+      <div id="result" class="result-box"></div>
+    </div>
+  </section>
+
+  <!-- ───── ③ 買い物リスト ───── -->
+  <section id="list" class="page hidden">
+    <div class="container">
+      <h1>買い物リスト</h1>
+      <ul id="shoppingList"></ul>
+      <button id="clearBought">購入済みを削除</button>
+    </div>
+  </section>
+
+  <!-- ───── ④ 在庫編集 ───── -->
+  <section id="inventory" class="page hidden">
+    <div class="container">
+      <h1>冷蔵庫の在庫</h1>
+      <form id="invForm">
+        <input id="invName" placeholder="食材名" required />
+        <input id="invAmount" placeholder="量" required />
+        <button>追加 / 更新</button>
+      </form>
+      <ul id="invList"></ul>
+    </div>
+  </section>
 
   <script src="app.js"></script>
 </body>
