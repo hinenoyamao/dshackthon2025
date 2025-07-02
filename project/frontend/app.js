@@ -63,7 +63,7 @@ async function queryLLM(text) {
 
     if (!res.ok) throw new Error("APIエラー");
     const data = await res.json();
-    if (!Array.isArray(data)) throw new Error("形式不正");
+    if (!Array.isArray(data)) throw new Error("食材を入力してください");
 
     lastResults = data;
     renderResults(data);
@@ -90,6 +90,7 @@ addListBtn.onclick = () => {
   save("shoppingList", list);
   alert("追加しました");
   addListBtn.classList.add("hidden");
+   location.hash = "#list";
 };
 
 /* =============================
@@ -108,7 +109,7 @@ function renderShopping() {
       <label class="${labelClass}">
         <input type="checkbox" ${checked}> ${item.name}: ${item.amount}
       </label>
-      <button data-i="${idx}" class="del">&times;</button>
+    
     `;
     listUL.appendChild(li);
   });
@@ -211,7 +212,14 @@ function showErr(message) {
 }
 
 function setResult(html) {
-  document.getElementById("result").innerHTML = html;
+  const resultEl = document.getElementById("result");
+  resultEl.innerHTML = html;
+
+  if (html && html.trim() !== "") {
+    resultEl.classList.add("active");
+  } else {
+    resultEl.classList.remove("active");
+  }
 }
 
 function load(key) {
