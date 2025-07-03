@@ -83,11 +83,13 @@ button {
 }
 
 button:hover         { opacity: 0.9; }
-button:focus-visible {
-  outline: 2px solid #dd7a52; /* main を少し濃く */
-  outline-offset: 2px;
-  box-shadow: 0 0 6px rgba(246, 143, 102, 0.35);
-}
+button:focus,
+button:focus-visible,
+button:active {                 /* ← 追加（クリック押下中も対象） */
+   outline: 2px solid var(--main);   /* main色のオレンジ枠 */
+   outline-offset: 2px;
+   box-shadow: 0 0 4px rgba(246, 143, 102, 0.3);
+ }
 
 /* ========================================
    Result Box (検索結果)
