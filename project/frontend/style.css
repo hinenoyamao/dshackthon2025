@@ -1,301 +1,131 @@
-/* =============================
-   リセット & カラーパレット
-   ============================= */
-:root {
-  --base-color: #fff;
-  --main: #F68F66;
-  --accent: #798455;
-  --text: #333a46;
-  --sub: #e9e8d9;
+:root{
+  --base:#fff;
+  --main:#F68F66;
+  --accent:#798455;
+  --text:#333a46;
+  --sub:#e9e8d9;
 }
 
-*, *::before, *::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* リセット */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+/* 基本レイアウト */
+body{font-family:sans-serif;background:var(--base);color:var(--text);}
+h1{color:var(--accent);margin:10px 0;text-align:center;}
+.container{width:100%;max-width:600px;margin:70px auto 30px;padding:20px;
+  background:var(--base);border:1px solid var(--sub);border-radius:8px;
+  box-shadow:0 0 8px rgba(0,0,0,.05);}
+.hidden{display:none;}
+
+/* 入力・ボタン */
+textarea,input{width:100%;padding:12px 16px;margin-top:5px;font-size:16px;
+  border-radius:16px;border:1px solid var(--accent);background:#f9f7f2;
+  color:var(--text);box-shadow:0 2px 6px rgba(0,0,0,.05);transition:.2s;}
+textarea:focus-visible,input:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;
+  box-shadow:0 0 4px rgba(121,132,85,.3);}
+button{padding:10px 20px;margin-top:10px;border:none;border-radius:16px;
+  background:var(--main);color:#fff;cursor:pointer;transition:opacity .2s;}
+button:hover{opacity:.9;}
+button:focus-visible{outline:2px solid #dd7a52;outline-offset:2px;
+  box-shadow:0 0 6px rgba(246,143,102,.35);}
+.error{color:red;margin-top:10px;}
+
+/* 検索結果ボックス */
+.result-box{margin-top:20px;padding:10px;border-radius:5px;background:transparent;
+  transition:background .3s;}
+.result-box.active{background:#f9f7f2;}
+.result-box ul{padding-left:20px;}
+.result-box li{margin-bottom:5px;}
+
+/* ヘッダー */
+header{position:fixed;top:0;left:0;right:0;height:60px;background:var(--base);
+  border-bottom:1px solid var(--sub);display:flex;align-items:center;
+  justify-content:space-between;padding:0 15px;z-index:1000;}
+.logo{font-weight:bold;text-decoration:none;color:var(--main);}
+#menuBtn{all:unset;font-size:24px;color:var(--main);cursor:pointer;
+  padding:8px;border-radius:50%;}
+
+/* サイドバー */
+.drawer{position:fixed;top:0;right:0;width:250px;height:100%;background:var(--base);
+  border-left:1px solid var(--sub);box-shadow:-4px 0 8px rgba(0,0,0,.05);
+  transform:translateX(100%);transition:transform .25s ease-out;z-index:999;
+  padding:80px 20px 20px;display:flex;flex-direction:column;}
+.drawer.open{transform:translateX(0);}
+.drawer a{display:block;padding:12px 0;font-weight:bold;color:var(--text);
+  text-decoration:none;border-bottom:1px solid var(--sub);}
+.drawer a:hover{background:#f9f7f2;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:998;}
+
+/* ホームカード */
+.home-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:15px;margin-top:20px;}
+.home-card{display:flex;align-items:center;justify-content:center;height:100px;
+  background:var(--main);color:#fff;font-weight:bold;font-size:18px;border-radius:20px;
+  box-shadow:0 2px 6px rgba(0,0,0,.05);text-decoration:none;transition:.2s;}
+.home-card:hover{background:#e67e58;box-shadow:0 4px 10px rgba(0,0,0,.1);}
+
+/* リスト共通 */
+#shoppingList li,#invList li{display:flex;align-items:center;
+  justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--sub);}
+#shoppingList li label{display:flex;align-items:center;font-size:16px;
+  gap:10px;cursor:pointer;line-height:1.8;}
+#shoppingList li input[type=checkbox]{width:20px;height:20px;border:2px solid var(--accent);
+  border-radius:4px;appearance:none;background:#fff;cursor:pointer;transition:.2s;
+  position:relative;}
+#shoppingList li input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent);}
+#shoppingList li input[type=checkbox]:checked::after{content:\"✓\";color:#fff;font-size:14px;
+  font-weight:bold;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+#shoppingList li label.checked{text-decoration:line-through;color:#aaa;}
+
+/* フローティング i ボタン */
+.info-btn{position:fixed;bottom:20px;right:20px;width:48px;height:48px;border-radius:50%;
+  background:var(--accent);color:#fff;font-size:24px;font-weight:bold;border:none;
+  cursor:pointer;z-index:1000;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 10px rgba(0,0,0,.12);transition:.2s;}
+.info-btn:hover{background:#8e9a61;transform:scale(1.05);}
+
+/* ───────── モーダル ───────── */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;
+  align-items:center;justify-content:center;z-index:1100;}
+.modal.hidden{display:none;}
+.modal-content{
+  background:var(--base);
+  padding:30px 20px;
+  border-radius:12px;
+  width:90%;
+  max-width: width 540px;
+  /* === 固定サイズをここで指定 === */
+  height: 280px;                 /* ← これで各ページ同じ高さ       */
+  display:flex;                 /* スライドとナビを縦に並べる     */
+  flex-direction:column;
+  box-shadow:0 4px 12px rgba(0,0,0,.15);
+  position:relative;
+}
+.modal-close{position:absolute;top:10px;right:10px;background:none;border:none;
+  font-size:24px;color:var(--text);cursor:pointer;}
+
+/* スライド領域を中央寄せ＋自動スクロール */
+.slides{
+  flex:1;                /* ナビ以外の余白をすべて占有 */
+  overflow:hidden;       /* 内部スクロールは子要素で */
 }
 
-/* =============================
-   基本レイアウト
-   ============================= */
-body {
-  font-family: sans-serif;
-  background-color: var(--base-color);
-  color: var(--text);
+.slides .slide{
+  display:none;
+  height:100%;           /* スライド高さも統一 */
+  overflow-y:auto;       /* 長文の場合だけスクロール */
 }
 
-h1 {
-  color: var(--accent);
-  margin: 10px 0;
-  text-align: center;
+.slides .slide.active{display:block;}
+
+.slides .slide h2{
+  margin:0 0 12px;       /* 見出し上部を揃える */
 }
 
-main {
-  margin: 90px auto 0;
-  width: min(90%, 600px);
-}
-
-.container {
-  width: 100%;
-  max-width: 600px;
-  margin: 70px auto 30px;
-  padding: 20px;
-  background: var(--base-color);
-  border: 1px solid var(--sub);
-  border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
-}
-
-/* =============================
-   フォーム入力・ボタン
-   ============================= */
-textarea,
-input {
-  width: 100%;
-  padding: 12px 16px;
-  margin-top: 5px;
-  font-size: 16px;
-  border-radius: 16px;
-  border: 1px solid var(--accent);
-  background-color: #f9f7f2;
-  color: var(--text);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease-in-out;
-}
-
-input:focus,
-input:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  box-shadow: 0 0 4px rgba(121, 132, 85, 0.3);
-}
-
-textarea:focus,
-textarea:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  box-shadow: 0 0 4px rgba(121, 132, 85, 0.3);
-}
-
-button {
-  padding: 10px 20px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 16px;
-  background: var(--main);
-  color: #fff;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-button:hover {
-  opacity: 0.9;
-}
-
-button:focus,
-button:focus-visible {
-  outline: 2px solid #dd7a52;
-  outline-offset: 2px;
-  box-shadow: 0 0 6px rgba(246, 143, 102, 0.35);
-}
-
-/* =============================
-   汎用ユーティリティ
-   ============================= */
-.hidden {
-  display: none;
-}
-
-.error {
-  color: red;
-  margin-top: 10px;
-}
-
-/* 検索結果ボックス：デフォルトは背景なし */
-.result-box {
-  margin-top: 20px;
-  padding: 10px;
-  border-radius: 5px;
-  background: transparent;
-  transition: background 0.3s ease;
-}
-
-/* 結果があるときだけ背景をつける */
-.result-box.active {
-  background: #f9f7f2;
-}
-
-.result-box ul {
-  padding-left: 20px;
-}
-
-.result-box li {
-  margin-bottom: 5px;
-}
-
-/* =============================
-   ヘッダー
-   ============================= */
-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: var(--base-color);
-  border-bottom: 1px solid var(--sub);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 15px;
-  z-index: 1000;
-}
-
-.logo {
-  font-weight: bold;
-  text-decoration: none;
-  color: var(--main);
-}
-
-#menuBtn {
-  all: unset;
-  font-size: 24px;
-  color: var(--main);
-  cursor: pointer;
-  background: none;
-  padding: 8px;
-  border-radius: 50%;
-}
-
-/* =============================
-   サイドバー
-   ============================= */
-.drawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 250px;
-  height: 100%;
-  background: var(--base-color);
-  border-left: 1px solid var(--sub);
-  box-shadow: -4px 0 8px rgba(0, 0, 0, 0.05);
-  transform: translateX(100%);
-  transition: transform 0.25s ease-out;
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  padding: 80px 20px 20px;
-}
-
-.drawer.open {
-  transform: translateX(0);
-}
-
-.drawer a {
-  display: block;
-  padding: 12px 0;
-  font-weight: bold;
-  color: var(--text);
-  text-decoration: none;
-  border-bottom: 1px solid var(--sub);
-}
-
-.drawer a:hover {
-  background: #f9f7f2;
-}
-
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 998;
-}
-
-/* =============================
-   ホーム画面カード
-   ============================= */
-.home-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.home-card {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100px;
-  background: var(--main);
-  color: #fff;
-  font-weight: bold;
-  font-size: 18px;
-  border-radius: 20px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  text-decoration: none;
-  transition: all 0.2s ease-in-out;
-}
-
-.home-card:hover {
-  background-color: #e67e58;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* =============================
-   買い物リスト・在庫リスト
-   ============================= */
-#shoppingList li,
-#invList li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--sub);
-}
-
-
-#shoppingList li label {
-  display: flex;
-  align-items: center;
-  font-size: 16px;
-  gap: 10px;
-  cursor: pointer;
-  line-height: 1.8;
-}
-
-#shoppingList li input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--accent);
-  border-radius: 4px;
-  appearance: none;
-  background-color: #fff;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  display: inline-block;
-  position: relative;
-}
-
-#shoppingList li input[type="checkbox"]:checked {
-  background-color: var(--accent);
-  border-color: var(--accent);
-}
-
-#shoppingList li input[type="checkbox"]:checked::after {
-  content: "✓";
-  color: #fff;
-  font-size: 14px;
-  font-weight: bold;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-#shoppingList li label.checked {
-  text-decoration: line-through;
-  color: #aaa;
-}
+.modal-nav{margin-top:20px;display:flex;gap:20px;justify-content:center;align-items:center;}
+.modal-nav button{all:unset;font-size:20px;cursor:pointer;color:var(--accent);
+  padding:6px 10px;border-radius:8px;}
+.modal-nav button:hover{background:#f9f7f2;}
+.modal-nav button:disabled{opacity:.3;cursor:default;}
+#slideIndicator{font-weight:bold;}
