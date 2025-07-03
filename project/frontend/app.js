@@ -4,9 +4,9 @@
 const pages = ["home", "search", "list", "inventory"];
 
 function showPage(id) {
-  pages.forEach(p => {
-    document.getElementById(p).classList.toggle("hidden", p !== id);
-  });
+  pages.forEach(p =>
+    document.getElementById(p).classList.toggle("hidden", p !== id)
+  );
   location.hash = "#" + id;
 }
 window.addEventListener("hashchange", () =>
@@ -19,7 +19,9 @@ const overlay = document.getElementById("overlay");
 const menuBtn = document.getElementById("menuBtn");
 menuBtn.onclick   = () => toggleDrawer(!drawer.classList.contains("open"));
 overlay.onclick   = () => toggleDrawer(false);
-drawer.querySelectorAll("a").forEach(a => (a.onclick = () => toggleDrawer(false)));
+drawer.querySelectorAll("a").forEach(
+  a => (a.onclick = () => toggleDrawer(false))
+);
 function toggleDrawer(open) {
   drawer.classList.toggle("open", open);
   overlay.classList.toggle("hidden", !open);
@@ -28,12 +30,12 @@ function toggleDrawer(open) {
 /* =============================
    使い方ガイド（モーダル）
 ============================= */
-const infoBtn   = document.getElementById("infoBtn");
-const guideModal = document.getElementById("guideModal");
-const guideClose = document.getElementById("guideClose");
-const slideEls   = [...document.querySelectorAll(".slide")];
-const prevBtn    = document.getElementById("prevSlide");
-const nextBtn    = document.getElementById("nextSlide");
+const infoBtn        = document.getElementById("infoBtn");
+const guideModal     = document.getElementById("guideModal");
+const guideClose     = document.getElementById("guideClose");
+const slideEls       = [...document.querySelectorAll(".slide")];
+const prevBtn        = document.getElementById("prevSlide");
+const nextBtn        = document.getElementById("nextSlide");
 const slideIndicator = document.getElementById("slideIndicator");
 let current = 0;
 
@@ -101,15 +103,49 @@ function renderResults(items) {
     setResult("<p>材料が見つかりません</p>");
     return;
   }
-  const listHtml = items.map(i => `<li>${i.name}: ${i.amount}</li>`).join("");
+  const listHtml = items
+    .map(i => `<li>${i.name}: ${i.amount}</li>`)
+    .join("");
   setResult(`<ul>${listHtml}</ul>`);
 }
 
+/* === ヘルパー: 数量と単位を分離 === */
+function parseAmount(str = "") {
+  const m = str.trim().match(/^([0-9]+(?:\\.[0-9]+)?)(.*)$/);
+  if (!m) return { num: null, unit: str.trim() }; // 数字先頭でなければ数値なし
+  return { num: parseFloat(m[1]), unit: m[2] };    // unit には元の余白も保持
+}
+
+/* === 重複食材を単位ごとに合算して追加 === */
 addListBtn.onclick = () => {
   const list = load("shoppingList");
-  lastResults.forEach(i => list.push({ ...i, bought: false }));
+
+  lastResults.forEach(item => {
+    const idx = list.findIndex(el => el.name === item.name);
+    if (idx > -1) {
+      // 既にある食材
+      const cur = parseAmount(list[idx].amount);
+      const add = parseAmount(item.amount);
+
+      if (
+        cur.num !== null &&
+        add.num !== null &&
+        cur.unit === add.unit       // 単位が一致
+      ) {
+        const total = cur.num + add.num;
+        list[idx].amount = `${total}${cur.unit}`;
+      } else {
+        // 単位が異なる or 数値化不可 → 文字列で連結
+        list[idx].amount = `${list[idx].amount} + ${item.amount}`;
+      }
+    } else {
+      // 新規食材
+      list.push({ ...item, bought: false });
+    }
+  });
+
   save("shoppingList", list);
-  alert("追加しました");
+  alert("追加 / 統合しました");
   addListBtn.classList.add("hidden");
   location.hash = "#list";
 };
@@ -117,7 +153,7 @@ addListBtn.onclick = () => {
 /* =============================
    買い物リスト
 ============================= */
-const listUL  = document.getElementById("shoppingList");
+const listUL   = document.getElementById("shoppingList");
 const clearBtn = document.getElementById("clearBought");
 
 function renderShopping() {
