@@ -1,47 +1,71 @@
 /* =============================
    ルーティング & ドロワー
-   ============================= */
+============================= */
 const pages = ["home", "search", "list", "inventory"];
 
 function showPage(id) {
-  pages.forEach(page => {
-    document.getElementById(page).classList.toggle("hidden", page !== id);
+  pages.forEach(p => {
+    document.getElementById(p).classList.toggle("hidden", p !== id);
   });
   location.hash = "#" + id;
 }
-
-window.addEventListener("hashchange", () => {
-  showPage(location.hash.slice(1) || "home");
-});
-
+window.addEventListener("hashchange", () =>
+  showPage(location.hash.slice(1) || "home")
+);
 showPage(location.hash.slice(1) || "home");
 
-const drawer = document.getElementById("drawer");
+const drawer  = document.getElementById("drawer");
 const overlay = document.getElementById("overlay");
 const menuBtn = document.getElementById("menuBtn");
-
-menuBtn.onclick = () => {
-  const willOpen = !drawer.classList.contains("open");
-  toggleDrawer(willOpen);
-};
-
-overlay.onclick = () => toggleDrawer(false);
-drawer.querySelectorAll("a").forEach(a => {
-  a.onclick = () => toggleDrawer(false);
-});
-
+menuBtn.onclick   = () => toggleDrawer(!drawer.classList.contains("open"));
+overlay.onclick   = () => toggleDrawer(false);
+drawer.querySelectorAll("a").forEach(a => (a.onclick = () => toggleDrawer(false)));
 function toggleDrawer(open) {
   drawer.classList.toggle("open", open);
   overlay.classList.toggle("hidden", !open);
 }
 
 /* =============================
+   使い方ガイド（モーダル）
+============================= */
+const infoBtn   = document.getElementById("infoBtn");
+const guideModal = document.getElementById("guideModal");
+const guideClose = document.getElementById("guideClose");
+const slideEls   = [...document.querySelectorAll(".slide")];
+const prevBtn    = document.getElementById("prevSlide");
+const nextBtn    = document.getElementById("nextSlide");
+const slideIndicator = document.getElementById("slideIndicator");
+let current = 0;
+
+function showSlide(i) {
+  slideEls.forEach((el, idx) => el.classList.toggle("active", idx === i));
+  slideIndicator.textContent = `${i + 1} / ${slideEls.length}`;
+  prevBtn.disabled = i === 0;
+  nextBtn.disabled = i === slideEls.length - 1;
+}
+infoBtn.onclick = () => {
+  guideModal.classList.remove("hidden");
+  current = 0;
+  showSlide(current);
+};
+guideClose.onclick = () => guideModal.classList.add("hidden");
+guideModal.onclick = e => {
+  if (e.target === guideModal) guideModal.classList.add("hidden");
+};
+prevBtn.onclick = () => {
+  if (current > 0) { current--; showSlide(current); }
+};
+nextBtn.onclick = () => {
+  if (current < slideEls.length - 1) { current++; showSlide(current); }
+};
+
+/* =============================
    材料検索
-   ============================= */
-const searchBtn = document.getElementById("searchButton");
-const addListBtn = document.getElementById("addListButton");
+============================= */
+const searchBtn   = document.getElementById("searchButton");
+const addListBtn  = document.getElementById("addListButton");
 const recipeInput = document.getElementById("recipeInput");
-let lastResults = [];
+let lastResults   = [];
 
 searchBtn.onclick = () => {
   const text = recipeInput.value.trim();
@@ -53,18 +77,15 @@ async function queryLLM(text) {
   showErr("");
   setResult("");
   addListBtn.classList.add("hidden");
-
   try {
     const res = await fetch("/parseRecipe", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ recipe: text })
     });
-
     if (!res.ok) throw new Error("APIエラー");
     const data = await res.json();
     if (!Array.isArray(data)) throw new Error("食材を入力してください");
-
     lastResults = data;
     renderResults(data);
     addListBtn.classList.remove("hidden");
@@ -90,70 +111,53 @@ addListBtn.onclick = () => {
   save("shoppingList", list);
   alert("追加しました");
   addListBtn.classList.add("hidden");
-   location.hash = "#list";
+  location.hash = "#list";
 };
 
 /* =============================
    買い物リスト
-   ============================= */
-const listUL = document.getElementById("shoppingList");
+============================= */
+const listUL  = document.getElementById("shoppingList");
 const clearBtn = document.getElementById("clearBought");
 
 function renderShopping() {
   listUL.innerHTML = "";
-  load("shoppingList").forEach((item, idx) => {
+  load("shoppingList").forEach(item => {
     const li = document.createElement("li");
     const checked = item.bought ? "checked" : "";
-    const labelClass = item.bought ? "checked" : "";
+    const cls = item.bought ? "checked" : "";
     li.innerHTML = `
-      <label class="${labelClass}">
+      <label class="${cls}">
         <input type="checkbox" ${checked}> ${item.name}: ${item.amount}
       </label>
-    
     `;
     listUL.appendChild(li);
   });
 }
-
-listUL.onchange = (e) => {
+listUL.onchange = e => {
   if (e.target.type === "checkbox") {
-    const checkboxes = [...listUL.querySelectorAll("input")];
-    const idx = checkboxes.indexOf(e.target);
+    const idx  = [...listUL.querySelectorAll("input")].indexOf(e.target);
     const list = load("shoppingList");
     list[idx].bought = e.target.checked;
     save("shoppingList", list);
     renderShopping();
   }
 };
-
-listUL.onclick = (e) => {
-  if (e.target.classList.contains("del")) {
-    const list = load("shoppingList");
-    list.splice(e.target.dataset.i, 1);
-    save("shoppingList", list);
-    renderShopping();
-  }
-};
-
 clearBtn.onclick = () => {
-  const filtered = load("shoppingList").filter(item => !item.bought);
-  save("shoppingList", filtered);
+  save("shoppingList", load("shoppingList").filter(i => !i.bought));
   renderShopping();
 };
-
 window.addEventListener("hashchange", () => {
-  if (location.hash === "#list") {
-    renderShopping();
-  }
+  if (location.hash === "#list") renderShopping();
 });
 
 /* =============================
    在庫編集
-   ============================= */
-const invForm = document.getElementById("invForm");
-const invName = document.getElementById("invName");
+============================= */
+const invForm   = document.getElementById("invForm");
+const invName   = document.getElementById("invName");
 const invAmount = document.getElementById("invAmount");
-const invList = document.getElementById("invList");
+const invList   = document.getElementById("invList");
 
 function renderInv() {
   invList.innerHTML = "";
@@ -166,26 +170,19 @@ function renderInv() {
     invList.appendChild(li);
   });
 }
-
-invForm.onsubmit = (e) => {
+invForm.onsubmit = e => {
   e.preventDefault();
-  const list = load("inventory");
-  const name = invName.value.trim();
+  const list   = load("inventory");
+  const name   = invName.value.trim();
   const amount = invAmount.value.trim();
-  const idx = list.findIndex(item => item.name === name);
-
-  if (idx > -1) {
-    list[idx].amount = amount;
-  } else {
-    list.push({ name, amount });
-  }
-
+  const idx    = list.findIndex(i => i.name === name);
+  idx > -1 ? (list[idx].amount = amount)
+           : list.push({ name, amount });
   save("inventory", list);
   invForm.reset();
   renderInv();
 };
-
-invList.onclick = (e) => {
+invList.onclick = e => {
   if (e.target.classList.contains("del")) {
     const list = load("inventory");
     list.splice(e.target.dataset.i, 1);
@@ -193,39 +190,27 @@ invList.onclick = (e) => {
     renderInv();
   }
 };
-
 window.addEventListener("hashchange", () => {
-  if (location.hash === "#inventory") {
-    renderInv();
-  }
+  if (location.hash === "#inventory") renderInv();
 });
 
 /* =============================
    共通関数
-   ============================= */
-function toggleLoad(show) {
-  document.getElementById("loading").classList.toggle("hidden", !show);
+============================= */
+function toggleLoad(s) {
+  document.getElementById("loading").classList.toggle("hidden", !s);
 }
-
-function showErr(message) {
-  document.getElementById("error").innerText = message;
+function showErr(m) {
+  document.getElementById("error").innerText = m;
 }
-
 function setResult(html) {
-  const resultEl = document.getElementById("result");
-  resultEl.innerHTML = html;
-
-  if (html && html.trim() !== "") {
-    resultEl.classList.add("active");
-  } else {
-    resultEl.classList.remove("active");
-  }
+  const el = document.getElementById("result");
+  el.innerHTML = html;
+  el.classList.toggle("active", !!html.trim());
 }
-
-function load(key) {
-  return JSON.parse(localStorage.getItem(key) || "[]");
+function load(k) {
+  return JSON.parse(localStorage.getItem(k) || "[]");
 }
-
-function save(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
+function save(k, v) {
+  localStorage.setItem(k, JSON.stringify(v));
 }

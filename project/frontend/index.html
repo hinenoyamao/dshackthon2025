@@ -7,13 +7,13 @@
 </head>
 <body>
 
-  <!-- ───── ヘッダー + ハンバーガー ───── -->
+  <!-- ── ヘッダー ── -->
   <header>
     <a class="logo" href="#home">🍳 Recipe Helper</a>
     <button id="menuBtn" aria-label="menu">☰</button>
   </header>
 
-  <!-- ───── ドロワーナビ ───── -->
+  <!-- ── サイドドロワー ── -->
   <aside id="drawer" class="drawer">
     <nav>
       <a href="#home"      class="nav-link">ホーム</a>
@@ -24,7 +24,7 @@
   </aside>
   <div id="overlay" class="overlay hidden"></div>
 
-  <!-- ───── ① ホーム ───── -->
+  <!-- ── ① ホーム ── -->
   <section id="home" class="page">
     <div class="container">
       <h1>レシピ支援アプリ</h1>
@@ -37,7 +37,7 @@
     </div>
   </section>
 
-  <!-- ───── ② 材料検索 ───── -->
+  <!-- ── ② 材料検索 ── -->
   <section id="search" class="page hidden">
     <div class="container">
       <h1>材料を検索</h1>
@@ -50,7 +50,7 @@
     </div>
   </section>
 
-  <!-- ───── ③ 買い物リスト ───── -->
+  <!-- ── ③ 買い物リスト ── -->
   <section id="list" class="page hidden">
     <div class="container">
       <h1>買い物リスト</h1>
@@ -59,18 +59,54 @@
     </div>
   </section>
 
-  <!-- ───── ④ 在庫編集 ───── -->
+  <!-- ── ④ 在庫編集 ── -->
   <section id="inventory" class="page hidden">
     <div class="container">
       <h1>冷蔵庫の在庫</h1>
       <form id="invForm">
-        <input id="invName" placeholder="食材名" required />
+        <input id="invName"   placeholder="食材名" required />
         <input id="invAmount" placeholder="量" required />
         <button>追加 / 更新</button>
       </form>
       <ul id="invList"></ul>
     </div>
   </section>
+
+  <!-- ── 使い方ガイド（モーダル） ── -->
+  <div id="guideModal" class="modal hidden">
+    <div class="modal-content">
+      <button id="guideClose" class="modal-close" aria-label="close">&times;</button>
+
+      <div class="slides">
+        <div class="slide active">
+          <h2>① 材料検索</h2>
+          <p>作りたい料理の名前をボックスに入力します</p>
+          <p>必要な食材が表示されます</p>
+          <p>必要に応じて買い物リストに食材の追加をすることができます</p>
+        </div>
+        <div class="slide">
+          <h2>② 買い物リスト</h2>
+          <p>検索結果の食材がリストに追加されます</p>
+          <p>チェックボックス機能で管理が簡単です</p>
+          <p>ページ一番下のボタンで購入済みの食材をリストから消去できます</p>
+        </div>
+        <div class="slide">
+          <h2>③ 冷蔵庫リスト</h2>
+          <p>ご自宅の冷蔵庫の食材と量をボックスに入力します</p>
+          <p>ご自宅の冷蔵庫の状況を記録することで，購入する量の管理がしやすくなります</p>
+        </div>
+      </div>
+
+      <div class="modal-nav">
+        <button id="prevSlide" aria-label="prev">◀︎</button>
+        <span id="slideIndicator">1 / 3</span>
+        <button id="nextSlide" aria-label="next">▶︎</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── フローティング i ボタン ── -->
+  <button id="infoBtn" class="info-btn" aria-label="how-to guide">i</button>
 
   <script src="app.js"></script>
 </body>
