@@ -11,7 +11,7 @@ CREATE TABLE fridge (
     user_id        INTEGER NOT NULL
                      REFERENCES users(user_id)
                      ON DELETE CASCADE,
-    ingredients_id INTEGER,          -- FK は後で付与
+    ingredients_id INTEGER,
     fridge_name    TEXT,
     fridge_amount  NUMERIC
 );
