@@ -2,7 +2,7 @@ name: Release to Develop Environment
 on:
   push:
     branches:
-      - main
+      - develop2
       
 jobs:
   job1:
