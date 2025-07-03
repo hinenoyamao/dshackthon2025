@@ -72,6 +72,13 @@ input:focus-visible {
   box-shadow: 0 0 4px rgba(121, 132, 85, 0.3);
 }
 
+input:-webkit-autofill,
+textarea:-webkit-autofill {
+  background-color: #f9f7f2 !important; /* ← 背景をあなたの意図した色に強制上書き */
+  -webkit-box-shadow: 0 0 0px 1000px #f9f7f2 inset !important; /* ← 自動補完の水色背景を潰す技 */
+  color: var(--text) !important;
+}
+
 button {
   padding: 10px 20px;
   margin-top: 10px;
