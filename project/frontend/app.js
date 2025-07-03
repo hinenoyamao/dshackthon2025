@@ -202,6 +202,14 @@ const invName   = document.getElementById("invName");
 const invAmount = document.getElementById("invAmount");
 const invList   = document.getElementById("invList");
 
+if (!localStorage.getItem("inventory")) {
+  save("inventory", [
+    { name: "牛乳",   amount: "500ml" },
+    { name: "たまご", amount: "6個"  },
+    { name: "バター", amount: "50g"  }
+  ]);
+}
+
 function renderInv() {
   invList.innerHTML = "";
   load("inventory").forEach((item, idx) => {
@@ -249,6 +257,8 @@ function showErr(m) {
 function setResult(html) {
   const el = document.getElementById("result");
   el.innerHTML = html;
+
+  // 結果が空なら非表示にする（余白も消える）
   el.classList.toggle("active", !!html.trim());
 }
 function load(k) {
