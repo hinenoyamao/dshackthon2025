@@ -16,16 +16,52 @@
   <!-- ── サイドドロワー ── -->
   <aside id="drawer" class="drawer">
     <nav>
+      <a href="#login" style="margin-bottom:20px;">
+        <span id="userLabel">ゲスト</span> さん
+      </a>
       <a href="#home"      class="nav-link">ホーム</a>
       <a href="#search"    class="nav-link">材料検索</a>
       <a href="#list"      class="nav-link">買い物リスト</a>
       <a href="#inventory" class="nav-link">冷蔵庫リスト</a>
+      <button id="logoutBtn" class="nav-link">ログアウト</button>
     </nav>
   </aside>
   <div id="overlay" class="overlay hidden"></div>
 
+  <!-- ── ログイン ── -->
+  <section id="login" class="page">
+    <div class="container">
+      <h1>ログイン</h1>
+      <form id="loginForm" class="auth-form">
+        <input id="liName" placeholder="ユーザー名" required />
+        <input id="liPass" type="password" placeholder="パスワード" required />
+        <button>サインイン</button>
+      </form>
+      <p style="text-align:center;margin-top:10px;">
+        登録していない人は <a href="#signup">こちら</a>
+      </p>
+      <div id="loginMsg" class="error"></div>
+    </div>
+  </section>
+
+  <!-- ── サインアップ ── -->
+  <section id="signup" class="page hidden">
+    <div class="container">
+      <h1>新規登録</h1>
+      <form id="signupForm" class="auth-form">
+        <input id="suName" placeholder="ユーザー名" required />
+        <input id="suPass" type="password" placeholder="パスワード" required />
+        <button>サインアップ</button>
+      </form>
+      <p style="text-align:center;margin-top:10px;">
+        既に登録済みの方は <a href="#login">ログインへ</a>
+      </p>
+      <div id="signupMsg" class="error"></div>
+    </div>
+  </section>
+
   <!-- ── ① ホーム ── -->
-  <section id="home" class="page">
+  <section id="home" class="page hidden">
     <div class="container">
       <h1>レシピ支援アプリ</h1>
       <div class="home-grid">
@@ -75,7 +111,6 @@
   <div id="guideModal" class="modal hidden">
     <div class="modal-content">
       <button id="guideClose" class="modal-close" aria-label="close">&times;</button>
-
       <div class="slides">
         <div class="slide active">
           <h2>① 材料検索</h2>
@@ -95,7 +130,6 @@
           <p>ご自宅の冷蔵庫の状況を記録することで，購入する量の管理がしやすくなります</p>
         </div>
       </div>
-
       <div class="modal-nav">
         <button id="prevSlide" aria-label="prev">◀︎</button>
         <span id="slideIndicator">1 / 3</span>
