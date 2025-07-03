@@ -19,7 +19,7 @@
       <a href="#home"      class="nav-link">ホーム</a>
       <a href="#search"    class="nav-link">材料検索</a>
       <a href="#list"      class="nav-link">買い物リスト</a>
-      <a href="#inventory" class="nav-link">冷蔵庫在庫</a>
+      <a href="#inventory" class="nav-link">冷蔵庫リスト</a>
     </nav>
   </aside>
   <div id="overlay" class="overlay hidden"></div>
@@ -28,11 +28,10 @@
   <section id="home" class="page">
     <div class="container">
       <h1>レシピ支援アプリ</h1>
-      <p>使いたい機能を選んでください。</p>
       <div class="home-grid">
         <a href="#search"    class="home-card">材料検索</a>
         <a href="#list"      class="home-card">買い物リスト</a>
-        <a href="#inventory" class="home-card">冷蔵庫在庫</a>
+        <a href="#inventory" class="home-card">冷蔵庫リスト</a>
       </div>
     </div>
   </section>
@@ -41,7 +40,7 @@
   <section id="search" class="page hidden">
     <div class="container">
       <h1>材料を検索</h1>
-      <textarea id="recipeInput" placeholder="例: カレーとサラダ"></textarea>
+      <textarea id="recipeInput" placeholder="料理名を入力してください"></textarea>
       <button id="searchButton">検索</button>
       <button id="addListButton" class="hidden">買い物リストに追加</button>
       <div id="loading" class="hidden">🔄 検索中...</div>
@@ -62,7 +61,7 @@
   <!-- ── ④ 在庫編集 ── -->
   <section id="inventory" class="page hidden">
     <div class="container">
-      <h1>冷蔵庫の在庫</h1>
+      <h1>冷蔵庫リスト</h1>
       <form id="invForm">
         <input id="invName"   placeholder="食材名" required />
         <input id="invAmount" placeholder="量" required />
