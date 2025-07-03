@@ -1,121 +1,95 @@
 /* =====================================================
-   Recipe Helper  Frontend  – 2025-07-04  (Auth 統合版)
-   - login / signup / logout（Cookie ベース）
-   - 既存機能：材料検索＋買い物リスト(DB)＋冷蔵庫(DB)＋ガイド
+   Recipe Helper – Frontend  (auth / DB / guide)
 ===================================================== */
 
-/* ---------- 共通 ---------- */
+/* ───────────────────────────────────
+   1. 共通ヘルパー
+────────────────────────────────── */
 async function api(p, o = {}) {
+  o.credentials = "same-origin";                // ★ クッキーを必ず送信
   const r = await fetch(p, o);
-  if (!r.ok) throw new Error(await r.text());
+  if (!r.ok) {
+    if (r.status === 401) { location.hash = "#login"; throw new Error("unauth"); }
+    throw new Error(await r.text());
+  }
   return r.json();
 }
-function showErr(m)  { document.getElementById("error" ).innerText = m; }
-function toggleLoad(s){ document.getElementById("loading").classList.toggle("hidden", !s); }
+function showErr(m){document.getElementById("error").innerText=m;}
+function toggleLoad(s){document.getElementById("loading").classList.toggle("hidden",!s);}
 function setResult(html){
   const el=document.getElementById("result");
   el.innerHTML=html;
   el.classList.toggle("active",!!html.trim());
 }
 
-/* ---------- Cookie Helper ---------- */
-function setCookie(n,v,d=7){
-  const t=new Date();t.setTime(t.getTime()+d*24*60*60*1000);
-  document.cookie=`${n}=${encodeURIComponent(v)};path=/;expires=${t.toUTCString()}`;
-}
-function getCookie(n){
-  const m=document.cookie.match(new RegExp(`${n}=([^;]+)`));
-  return m?decodeURIComponent(m[1]):null;
-}
-function delCookie(n){
-  document.cookie=`${n}=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-}
-
-/* ---------- ページ遷移 ---------- */
+/* ───────────────────────────────────
+   2. ページ遷移 / Drawer
+────────────────────────────────── */
 const pages=["login","signup","home","search","list","inventory"];
-function showPage(id){
-  pages.forEach(p=>document.getElementById(p).classList.toggle("hidden",p!==id));
-  location.hash="#"+id;
-}
+function showPage(id){pages.forEach(p=>document.getElementById(p).classList.toggle("hidden",p!==id));location.hash="#"+id;}
 window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)||"home"));
 showPage(location.hash.slice(1)||"home");
 
-/* ---------- Drawer ---------- */
 const drawer=document.getElementById("drawer"),
       overlay=document.getElementById("overlay"),
       menuBtn=document.getElementById("menuBtn");
 menuBtn.onclick=()=>toggleDrawer(!drawer.classList.contains("open"));
 overlay.onclick=()=>toggleDrawer(false);
 drawer.querySelectorAll("a").forEach(a=>a.onclick=()=>toggleDrawer(false));
-function toggleDrawer(o){
-  drawer.classList.toggle("open",o);
-  overlay.classList.toggle("hidden",!o);
-}
+function toggleDrawer(o){drawer.classList.toggle("open",o);overlay.classList.toggle("hidden",!o);}
 
 /* =====================================================
-   １. 認証まわり
+   3. 認証フロー
 ===================================================== */
-const userLabel = document.getElementById("userLabel");
-const logoutBtn = document.getElementById("logoutBtn");
-const loginForm = document.getElementById("loginForm"),
-      liName    = document.getElementById("liName"),
-      liPass    = document.getElementById("liPass"),
-      loginMsg  = document.getElementById("loginMsg");
-const signupForm= document.getElementById("signupForm"),
-      suName    = document.getElementById("suName"),
-      suPass    = document.getElementById("suPass"),
-      signupMsg = document.getElementById("signupMsg");
+const userLabel=document.getElementById("userLabel"),
+      logoutBtn=document.getElementById("logoutBtn"),
+      loginForm=document.getElementById("loginForm"),
+      liName=document.getElementById("liName"),
+      liPass=document.getElementById("liPass"),
+      loginMsg=document.getElementById("loginMsg"),
+      signupForm=document.getElementById("signupForm"),
+      suName=document.getElementById("suName"),
+      suPass=document.getElementById("suPass"),
+      signupMsg=document.getElementById("signupMsg");
 
-/* --- ユーザーストア（Cookie に JSON 保持） --- */
-function loadUsers(){try{return JSON.parse(getCookie("users")||"{}");}catch{return {}}}
-function saveUsers(obj){setCookie("users",JSON.stringify(obj));}
-
-/* --- 認証チェック＆リダイレクト --- */
-function ensureAuth(){
-  const u=getCookie("loginUser");
-  userLabel.textContent = u ? u : "ゲスト";
-  if(!u && location.hash!=="#signup"){location.hash="#login";}
-  if(u && (location.hash==="#login"||location.hash==="#signup")){location.hash="#home";}
+/* 認証状態を取得して画面遷移 */
+async function ensureAuth(){
+  try{
+    const {user}=await api("/auth/me");
+    userLabel.textContent=user?user.name:"ゲスト";
+    if(!user && location.hash!=="#signup"){location.hash="#login";}
+    if(user && (location.hash==="#login"||location.hash==="#signup")) location.hash="#home";
+  }catch{/* 通信失敗時は無視 */}
 }
+ensureAuth();
 window.addEventListener("hashchange",ensureAuth);
-ensureAuth();     // 初期実行
 
-/* --- サインアップ処理 --- */
-signupForm.onsubmit=e=>{
+/* サインアップ */
+signupForm.onsubmit=async e=>{
   e.preventDefault();
-  const users=loadUsers();
-  const u=suName.value.trim(), p=suPass.value;
-  if(users[u]){signupMsg.textContent="既存ユーザーです";return;}
-  users[u]=p; saveUsers(users);
-  signupMsg.textContent="登録完了！ログインしてください";
-  signupForm.reset();
-  location.hash="#login";
+  try{
+    await api("/auth/signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:suName.value.trim(),password:suPass.value})});
+    signupMsg.textContent="登録完了！ログインしてください";
+    signupForm.reset(); location.hash="#login";
+  }catch(err){signupMsg.textContent=err.message;}
 };
 
-/* --- ログイン処理 --- */
-loginForm.onsubmit=e=>{
+/* ログイン */
+loginForm.onsubmit=async e=>{
   e.preventDefault();
-  const users=loadUsers();
-  const u=liName.value.trim(), p=liPass.value;
-  if(users[u]&&users[u]===p){
-    setCookie("loginUser",u);
+  try{
+    const r=await api("/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:liName.value.trim(),password:liPass.value})});
+    userLabel.textContent=r.name;
     loginMsg.textContent="";
-    ensureAuth();
     location.hash="#home";
-  }else{
-    loginMsg.textContent="ユーザー名かパスワードが違います";
-  }
+  }catch(err){loginMsg.textContent=err.message;}
 };
 
-/* --- ログアウト --- */
-logoutBtn.onclick=()=>{
-  delCookie("loginUser");
-  ensureAuth();
-  location.hash="#login";
-};
+/* ログアウト */
+logoutBtn.onclick=()=>api("/auth/logout",{method:"POST"}).then(()=>{location.hash="#login";});
 
 /* =====================================================
-   ２. 使い方ガイド（モーダル）
+   4. 使い方ガイド（モーダル）
 ===================================================== */
 const infoBtn=document.getElementById("infoBtn"),
       guideModal=document.getElementById("guideModal"),
@@ -139,12 +113,18 @@ prevBtn.onclick=()=>{if(curSlide)showSlide(curSlide-1);};
 nextBtn.onclick=()=>{if(curSlide<slides.length-1)showSlide(curSlide+1);};
 
 /* =====================================================
-   ３. 材料検索
+   5. 材料検索
 ===================================================== */
 const searchBtn=document.getElementById("searchButton"),
       addListBtn=document.getElementById("addListButton"),
       recipeInput=document.getElementById("recipeInput");
 let lastResults=[];
+recipeInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();      // 改行やsubmitを防ぐ
+    searchBtn.click();       // ボタンのクリックを呼び出す
+  }
+});
 searchBtn.onclick=async()=>{
   const text=recipeInput.value.trim();
   if(!text) return showErr("入力が空です");
@@ -160,7 +140,7 @@ function renderResults(arr){
 }
 
 /* =====================================================
-   ４. 買い物リスト（ingredients テーブル）
+   6. 買い物リスト
 ===================================================== */
 const listUL=document.getElementById("shoppingList"),
       clearBtn=document.getElementById("clearBought");
@@ -169,7 +149,7 @@ addListBtn.onclick=async()=>{
     await api("/api/ingredients/add",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:lastResults})});
     alert("追加 / 統合しました");
     location.hash==="#list"?renderShopping():location.hash="#list";
-  }catch(e){alert(e.message);}
+  }catch(err){alert(err.message);}
 };
 
 async function renderShopping(){
@@ -177,7 +157,8 @@ async function renderShopping(){
   const fr  =await api("/api/fridge");
   listUL.innerHTML="";
   list.forEach(it=>{
-    const warn=(fr.find(x=>x.name===it.name))?` (冷蔵庫に残り ${fr.find(x=>x.name===it.name).amount})`:"";
+    const f=fr.find(x=>x.name===it.name);
+    const warn=f?` (冷蔵庫に残り ${f.amount})`:"";
     const li=document.createElement("li");
     li.innerHTML=`<label class="${it.bought?"checked":""}">
         <input type="checkbox" data-id="${it.id}" ${it.bought?"checked":""}>
@@ -188,7 +169,7 @@ async function renderShopping(){
 }
 listUL.onchange=async e=>{
   if(e.target.type==="checkbox"){
-    await api("/api/ingredients/check",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:Number(e.target.dataset.id),checked:e.target.checked})});
+    await api("/api/ingredients/check",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:+e.target.dataset.id,checked:e.target.checked})});
     renderShopping();
   }
 };
@@ -196,7 +177,7 @@ clearBtn.onclick=()=>api("/api/ingredients/clearBought",{method:"DELETE"}).then(
 window.addEventListener("hashchange",()=>{if(location.hash==="#list")renderShopping();});
 
 /* =====================================================
-   ５. 冷蔵庫（fridge テーブル）
+   7. 冷蔵庫リスト
 ===================================================== */
 const invForm=document.getElementById("invForm"),
       invName=document.getElementById("invName"),
@@ -219,7 +200,7 @@ invForm.onsubmit=async e=>{
   try{
     await api("/api/fridge",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,amount})});
     invForm.reset();renderInv();
-  }catch(err){alert("追加に失敗:"+err.message);}
+  }catch(err){alert(err.message);}
 };
 invList.onclick=async e=>{
   if(e.target.classList.contains("del")){
