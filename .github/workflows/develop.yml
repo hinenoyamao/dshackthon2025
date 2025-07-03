@@ -1,0 +1,23 @@
+name: Release to Develop Environment
+on:
+  push:
+    branches:
+      - main
+      
+jobs:
+  job1:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: ssh and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /home/xb613607/xb613607.xbiz.jp/hackthon2025/project/
+            git checkout develop
+            git pull origin develop
