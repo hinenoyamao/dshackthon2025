@@ -109,6 +109,13 @@ function renderResults(items) {
   setResult(`<ul>${listHtml}</ul>`);
 }
 
+recipeInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    searchBtn.click();
+  }
+});
+
 /* === ヘルパー: 数量と単位を分離 === */
 function parseAmount(str = "") {
   const m = str.trim().match(/^([0-9]+(?:\\.[0-9]+)?)(.*)$/);
