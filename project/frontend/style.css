@@ -62,6 +62,7 @@ input {
   color: var(--text);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease-in-out;
+  height: 50px;
 }
 
 textarea:focus-visible,
@@ -98,8 +99,13 @@ button:active {                 /* ← 追加（クリック押下中も対象�
   margin-top: 20px;
   padding: 10px;
   border-radius: 5px;
-  background: transparent;            /* 結果なし：背景なし */
+  background: transparent;
   transition: background 0.3s ease;
+}
+
+/* 結果があるときだけ背景と余白つきで表示 */
+.result-box:not(.active) {
+  display: none;
 }
 
 .result-box.active { background: #f9f7f2; } /* 結果あり：薄い生成り */
