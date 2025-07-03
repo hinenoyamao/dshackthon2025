@@ -109,6 +109,13 @@ function renderResults(items) {
   setResult(`<ul>${listHtml}</ul>`);
 }
 
+recipeInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    searchBtn.click();
+  }
+});
+
 /* === ヘルパー: 数量と単位を分離 === */
 function parseAmount(str = "") {
   const m = str.trim().match(/^([0-9]+(?:\\.[0-9]+)?)(.*)$/);
@@ -195,6 +202,14 @@ const invName   = document.getElementById("invName");
 const invAmount = document.getElementById("invAmount");
 const invList   = document.getElementById("invList");
 
+if (!localStorage.getItem("inventory")) {
+  save("inventory", [
+    { name: "牛乳",   amount: "500ml" },
+    { name: "たまご", amount: "6個"  },
+    { name: "バター", amount: "50g"  }
+  ]);
+}
+
 function renderInv() {
   invList.innerHTML = "";
   load("inventory").forEach((item, idx) => {
@@ -242,6 +257,8 @@ function showErr(m) {
 function setResult(html) {
   const el = document.getElementById("result");
   el.innerHTML = html;
+
+  // 結果が空なら非表示にする（余白も消える）
   el.classList.toggle("active", !!html.trim());
 }
 function load(k) {
