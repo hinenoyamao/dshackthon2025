@@ -10,7 +10,7 @@ HEADERS = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/js
 MODEL = "meta-llama/llama-4-scout:free"
 
 # Flask準備
-app = Flask(__name__, static_folder="frontend", static_url_path="/")
+app = Flask(__name__, static_folder="project/frontend", static_url_path="/")
 
 
 @app.route("/")
