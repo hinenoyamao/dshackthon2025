@@ -23,11 +23,11 @@ client = OpenAI(
 logging.basicConfig(level=logging.DEBUG)
 
 # APIのセットアップしてる(apikeyはenvファイルで管理してるのでenvファイル持ってなきゃそもそも使えない)
-load_dotenv()
-API_KEY = os.getenv("API_KEY")
-API_URL = "https://openrouter.ai/api/v1/chat/completions"
-HEADERS = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
-MODEL = "meta-llama/llama-4-scout:free"
+# load_dotenv()
+# API_KEY = os.getenv("API_KEY")
+# API_URL = "https://openrouter.ai/api/v1/chat/completions"
+# HEADERS = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
+# MODEL = "meta-llama/llama-4-scout:free"
 
 # Flask準備
 app = Flask(__name__, static_folder="public", static_url_path="")
