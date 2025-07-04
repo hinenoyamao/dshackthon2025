@@ -22,8 +22,14 @@ async function api(p, o={}) {
   const r = await fetch(p, { credentials:"same-origin", ...o });
   if (!r.ok) {
     let code = `HTTP ${r.status}`;
-    try { code = (await r.clone().json()).error || code; } catch {}
-    throw new Error(code);          // ← err.message にコードを仕込む
+    try {
+      const res = await r.clone().json();
+      code = res.error || code;
+      if (code === "llm_unavailable") {
+        code = "APIエラー";
+      }
+    } catch {}
+    throw new Error(code);
   }
   return r.json();
 }
