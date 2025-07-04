@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from sql import auth, fridge, ingredients, parse_recipe
 import logging
 from openai import OpenAI
+from openai._base_client import SyncHttpxClientWrapper
+
 
 os.environ.pop("http_proxy", None)
 os.environ.pop("https_proxy", None)
@@ -16,6 +18,7 @@ MODEL = "meta-llama/llama-4-maverick:free"  # 安定性高めのモデルに変�
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=API_KEY,
+    http_client=SyncHttpxClientWrapper(),
 )
 logging.basicConfig(level=logging.DEBUG)
 
