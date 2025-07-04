@@ -1,4 +1,6 @@
 import re
+from util import parse_amount
+
 
 # 全角数字・全角ドット → 半角
 def to_half(s: str) -> str:
