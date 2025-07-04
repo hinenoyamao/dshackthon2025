@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: flask-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python api.py
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dshackathon2025
+          property: connectionString
