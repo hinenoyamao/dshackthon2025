@@ -27,8 +27,7 @@ function setResult(html){
 ────────────────────────────────── */
 const pages=["login","signup","home","search","list","inventory"];
 function showPage(id){pages.forEach(p=>document.getElementById(p).classList.toggle("hidden",p!==id));location.hash="#"+id;}
-window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)||"home"));
-showPage(location.hash.slice(1)||"home");
+ window.addEventListener("hashchange", ()=>ensureAuth());   // ← ensureAuth で描画も行う
 
 const drawer=document.getElementById("drawer"),
       overlay=document.getElementById("overlay"),
@@ -56,10 +55,20 @@ const userLabel=document.getElementById("userLabel"),
 async function ensureAuth(){
   try{
     const {user}=await api("/auth/me");
-    userLabel.textContent=user?user.name:"ゲスト";
-    if(!user && location.hash!=="#signup"){location.hash="#login";}
-    if(user && (location.hash==="#login"||location.hash==="#signup")) location.hash="#home";
-  }catch{/* 通信失敗時は無視 */}
+    userLabel.textContent = user ? user.name : "ゲスト";
+
+    /* 必要ならハッシュを書き換えるだけ ―― ここでは描画しない */
+    if (!user && location.hash !== "#signup")            location.hash = "#login";
+    if ( user && (location.hash==="#login"||location.hash==="#signup"))
+      location.hash = "#home";
+
+  }catch(e){
+    /* /auth/me が 401 やネットワークエラー → 未ログイン扱い */
+    location.hash = "#login";
+  }finally{
+    /* どの分岐でも必ず現在のハッシュに合わせて描画 */
+    showPage((location.hash || "#login").slice(1));
+  }
 }
 ensureAuth();
 window.addEventListener("hashchange",ensureAuth);
