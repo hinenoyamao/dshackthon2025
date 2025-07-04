@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import requests, os, re
 from dotenv import load_dotenv
+from sql import auth, fridge, ingredients, parse_recipe
 
 # APIのセットアップしてる(apikeyはenvファイルで管理してるのでenvファイル持ってなきゃそもそも使えない)
 load_dotenv()
@@ -10,12 +11,17 @@ HEADERS = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/js
 MODEL = "meta-llama/llama-4-scout:free"
 
 # Flask準備
-app = Flask(__name__, static_folder="project/frontend", static_url_path="/")
+app = Flask(__name__, static_folder="public", static_url_path="")
 
 
 @app.route("/")
 def index():
     return app.send_static_file("index.html")
+
+app.register_blueprint(auth.bp)
+app.register_blueprint(fridge.bp)
+app.register_blueprint(ingredients.bp)
+app.register_blueprint(parse_recipe.bp)
 
 # jsから受け取って料理の名前とか変数化
 @app.route("/parseRecipe", methods=["POST"])
