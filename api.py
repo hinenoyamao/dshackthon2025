@@ -3,6 +3,16 @@ import requests, os, re
 from dotenv import load_dotenv
 from sql import auth, fridge, ingredients, parse_recipe
 import logging
+from openai import OpenAI
+
+API_KEY = os.getenv("API_KEY")
+MODEL = "meta-llama/llama-4-maverick:free"  # 安定性高めのモデルに変更
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=API_KEY,
+)
+
 logging.basicConfig(level=logging.DEBUG)
 
 # APIのセットアップしてる(apikeyはenvファイルで管理してるのでenvファイル持ってなきゃそもそも使えない)
@@ -45,21 +55,31 @@ def handle_parse_recipe():
 """.strip()
 
     # これでAPIにプロンプト投げる準備
-    payload = {"model": MODEL, "messages": [{"role": "user", "content": prompt}]}
+    # payload = {"model": MODEL, "messages": [{"role": "user", "content": prompt}]}
+    completion = client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+        extra_headers={
+            "HTTP-Referer": "https://dshackthon.onrender.com",
+            "X-Title": "DSHackthonApp"
+        }
+    )
+    raw_reply = completion.choices[0].message.content
+    # #　APIに投げるtryが200以外ならexceptに入る
+    # print("📩 RECIPE:", recipe)
+    # print("🛰️ PROMPT:", prompt)
+    # print("📦 PAYLOAD:", payload)
+    # try:
+    #     r = requests.post(API_URL, headers=HEADERS, json=payload, timeout=30)
+    #     r.raise_for_status()
+    # except requests.RequestException as e:
+    #     print("❌ LLM API ERROR:", e)
+    #     return jsonify({"error": f"LLM API error: {e}"}), 502
 
-    #　APIに投げるtryが200以外ならexceptに入る
-    print("📩 RECIPE:", recipe)
-    print("🛰️ PROMPT:", prompt)
-    print("📦 PAYLOAD:", payload)
-    try:
-        r = requests.post(API_URL, headers=HEADERS, json=payload, timeout=30)
-        r.raise_for_status()
-    except requests.RequestException as e:
-        print("❌ LLM API ERROR:", e)
-        return jsonify({"error": f"LLM API error: {e}"}), 502
-
-    # 出力結果のテキストだけを変数に入れる。
-    raw_reply = r.json()["choices"][0]["message"]["content"]
+    # # 出力結果のテキストだけを変数に入れる。
+    # raw_reply = r.json()["choices"][0]["message"]["content"]
 
     result_data = []
     #　LLM出力は材料ごとに区切るために正規表現で分割してる。
