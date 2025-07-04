@@ -7,9 +7,9 @@
 ────────────────────────────────── */
 /* ユーザー向けメッセージ変換表 */
 const ERROR_DICT = {
-  unauth                 : "セッションが切れました。もう一度ログインしてください。",
-  invalid                : "ユーザー名またはパスワードが違います。",
-  duplicate              : "そのユーザー名は既に登録されています。",
+  "unauth"                 : "セッションが切れました。もう一度ログインしてください。",
+  "invalid"               : "ユーザー名またはパスワードが違います。",
+  "duplicate"              : "そのユーザー名は既に登録されています。",
   "name/pass required"   : "ユーザー名とパスワードを入力してください。",
   "recipe text empty"    : "料理名を入力してください。",
   "APIエラー"             : "サーバーとの通信に失敗しました。",
@@ -18,12 +18,12 @@ const ERROR_DICT = {
 const toFriendly = (msg="") =>
   ERROR_DICT[msg.trim()] || msg.trim() || "エラーが発生しました。再度お試しください。";
 
-async function api(p, o = {}) {
-  o.credentials = "same-origin";      // ★ クッキー送信
-  const r = await fetch(p, o);
+async function api(p, o={}) {
+  const r = await fetch(p, { credentials:"same-origin", ...o });
   if (!r.ok) {
-    if (r.status === 401) { location.hash = "#login"; throw new Error("unauth"); }
-    throw new Error(toFriendly(await r.text()));
+    let code = `HTTP ${r.status}`;
+    try { code = (await r.clone().json()).error || code; } catch {}
+    throw new Error(code);          // ← err.message にコードを仕込む
   }
   return r.json();
 }
@@ -38,9 +38,13 @@ function setResult(html){
    2. ページ遷移 / Drawer
 ────────────────────────────────── */
 const pages=["login","signup","home","search","list","inventory"];
-if (!location.hash || !pages.map(p=>"#"+p).includes(location.hash)){
-  location.hash="#login";
+if (!location.hash ||
+    !["#login","#signup","#home","#search","#list","#inventory"].includes(location.hash)){
+  location.hash = "#login";
 }
+
+// ① まず現在のハッシュを描画して“チラつき”を防ぐ
+showPage(location.hash.slice(1) || "login");
 function showPage(id){
   pages.forEach(p=>{
     const sec=document.getElementById(p);
@@ -79,11 +83,20 @@ async function ensureAuth(){
     location.hash="#login";
   }finally{
     showPage((location.hash||"#login").slice(1));
+    switch (location.hash) {
+      case "#inventory":
+        renderInv();
+        break;
+      case "#list":
+        renderShopping();
+        break;
+    }
+    }
     if(location.hash==="#login"){ loginForm.reset(); loginMsg.textContent=""; }
   }
-}
+
 ensureAuth();
-window.addEventListener("hashchange",ensureAuth);
+window.addEventListener("hashchange", ensureAuth);
 
 /* サインアップ */
 signupForm.onsubmit=async e=>{
@@ -93,7 +106,7 @@ signupForm.onsubmit=async e=>{
       body:JSON.stringify({name:suName.value.trim(),password:suPass.value})});
     signupMsg.textContent="登録完了！ログインしてください";
     signupForm.reset(); location.hash="#login";
-  }catch(err){signupMsg.textContent=err.message;}
+  }catch(err){signupMsg.textContent=ERROR_DICT[err.message];}
 };
 
 /* ログイン */
@@ -104,7 +117,7 @@ loginForm.onsubmit=async e=>{
       body:JSON.stringify({name:liName.value.trim(),password:liPass.value})});
     userLabel.textContent=r.name;
     loginMsg.textContent=""; location.hash="#home";
-  }catch(err){loginMsg.textContent=err.message;}
+  }catch(err){loginMsg.textContent=ERROR_DICT[err.message];}
 };
 
 /* ログアウト */
@@ -139,8 +152,11 @@ const searchBtn=document.getElementById("searchButton"),
       addListBtn=document.getElementById("addListButton"),
       recipeInput=document.getElementById("recipeInput");
 let lastResults=[];
-recipeInput.addEventListener("keydown",e=>{
-  if(e.key==="Enter"){e.preventDefault();searchBtn.click();}
+recipeInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();      // 改行やsubmitを防ぐ
+    searchBtn.click();       // ボタンのクリックを呼び出す
+  }
 });
 searchBtn.onclick=async()=>{
   const text=recipeInput.value.trim();
@@ -152,7 +168,7 @@ searchBtn.onclick=async()=>{
     if(!lastResults.length){ setResult("<p>材料が見つかりません</p>"); return; }
     setResult(`<ul>${lastResults.map(i=>`<li>${i.name}: ${i.amount}</li>`).join("")}</ul>`);
     addListBtn.classList.remove("hidden");
-  }catch(e){showErr(e.message);}
+  }catch(err){showErr(ERROR_DICT[err.message]);}
   finally{toggleLoad(false);}
 };
 
@@ -169,7 +185,7 @@ addListBtn.onclick=async()=>{
     ));
     alert("リストに追加しました");
     location.hash==="#list" ? renderShopping() : location.hash="#list";
-  }catch(err){showErr(err.message);}
+  }catch(err){showErr(ERROR_DICT[err.message]);}
 };
 
 async function renderShopping(){
@@ -186,7 +202,7 @@ async function renderShopping(){
           ${it.name}: ${it.amount}${warn}
         </label></li>`);
     });
-  }catch(err){showErr(err.message);}
+  }catch(err){showErr(ERROR_DICT[err.message]);}
 }
 listUL.onchange=async e=>{
   if(e.target.type==="checkbox"){
@@ -198,7 +214,7 @@ listUL.onchange=async e=>{
   }
 };
 clearBtn.onclick=()=>api("/api/ingredients/clearBought",{method:"DELETE"})
-  .then(renderShopping).catch(err=>showErr(err.message));
+  .then(renderShopping).catch(err=>showErr(ERROR_DICT[err.message]));
 window.addEventListener("hashchange",()=>{if(location.hash==="#list")renderShopping();});
 
 /* =====================================================
@@ -217,7 +233,7 @@ async function renderInv(){
         `<li><span>${it.name}: ${it.amount}</span>
          <button class="del" data-id="${it.id}">&times;</button></li>`);
     });
-  }catch(err){showErr(err.message);}
+  }catch(err){showErr(ERROR_DICT[err.message]);}
 }
 invForm.onsubmit=async e=>{
   e.preventDefault();
@@ -227,14 +243,14 @@ invForm.onsubmit=async e=>{
     await api("/api/fridge",{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({name,amount})});
     invForm.reset(); renderInv();
-  }catch(err){showErr(err.message);}
+  }catch(err){showErr(ERROR_DICT[err.message]);}
 };
 invList.onclick=async e=>{
   if(e.target.classList.contains("del")){
     try{
       await api(`/api/fridge/${e.target.dataset.id}`,{method:"DELETE"});
       renderInv();
-    }catch(err){showErr(err.message);}
+    }catch(err){showErr(ERROR_DICT[err.message]);}
   }
 };
 window.addEventListener("hashchange",()=>{if(location.hash==="#inventory")renderInv();});

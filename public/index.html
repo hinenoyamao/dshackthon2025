@@ -30,12 +30,12 @@
   <div id="overlay" class="overlay hidden"></div>
 
   <!-- ── ログイン ── -->
-  <section id="login" class="page">
+  <section id="login" class="page hidden">
     <div class="container">
       <h1>ログイン</h1>
       <form id="loginForm" class="auth-form">
-        <input id="liName" placeholder="ユーザー名" required />
-        <input id="liPass" type="password" placeholder="パスワード" required />
+        <input autocomplete="off" id="liName" placeholder="ユーザー名" required />
+        <input autocomplete="off" id="liPass" type="password" placeholder="パスワード" required />
         <button>サインイン</button>
       </form>
       <p style="text-align:center;margin-top:10px;">
@@ -50,8 +50,8 @@
     <div class="container">
       <h1>新規登録</h1>
       <form id="signupForm" class="auth-form">
-        <input id="suName" placeholder="ユーザー名" required />
-        <input id="suPass" type="password" placeholder="パスワード" required />
+        <input autocomplete="off" id="suName" placeholder="ユーザー名" required />
+        <input autocomplete="off" id="suPass" type="password" placeholder="パスワード" required />
         <button>サインアップ</button>
       </form>
       <p style="text-align:center;margin-top:10px;">
@@ -98,9 +98,9 @@
   <section id="inventory" class="page hidden">
     <div class="container">
       <h1>冷蔵庫リスト</h1>
-      <form id="invForm">
-        <input id="invName"   placeholder="食材名" required />
-        <input id="invAmount" placeholder="量" required />
+      <form id="invForm" novalidate>
+        <input autocomplete="off" id="invName"   placeholder="食材名" required />
+        <input  autocomplete="off" id="invAmount" placeholder="量" required />
         <button>追加 / 更新</button>
       </form>
       <ul id="invList"></ul>
