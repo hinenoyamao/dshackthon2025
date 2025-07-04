@@ -25,7 +25,7 @@ app.register_blueprint(parse_recipe.bp)
 
 # jsから受け取って料理の名前とか変数化
 @app.route("/parseRecipe", methods=["POST"])
-def parse_recipe():
+def handle_parse_recipe():
     data = request.get_json(force=True)
     recipe = (data or {}).get("recipe", "").strip()
     #recipeが空なら400返す
