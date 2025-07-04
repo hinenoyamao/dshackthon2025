@@ -5,6 +5,11 @@ from sql import auth, fridge, ingredients, parse_recipe
 import logging
 from openai import OpenAI
 
+os.environ.pop("http_proxy", None)
+os.environ.pop("https_proxy", None)
+os.environ.pop("HTTP_PROXY", None)
+os.environ.pop("HTTPS_PROXY", None)
+
 API_KEY = os.getenv("API_KEY")
 MODEL = "meta-llama/llama-4-maverick:free"  # 安定性高めのモデルに変更
 
@@ -12,7 +17,6 @@ client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=API_KEY,
 )
-
 logging.basicConfig(level=logging.DEBUG)
 
 # APIのセットアップしてる(apikeyはenvファイルで管理してるのでenvファイル持ってなきゃそもそも使えない)
