@@ -25,10 +25,17 @@ def parse_recipe():
             "messages": [{"role": "user", "content": prompt}]
         }, timeout=30)
     r.raise_for_status()
-    raw = r.json()["choices"][0]["message"]["content"]
-    out, pat = [], re.compile(r"^\s*([^\s\u3000:：]+.*?)\s*[:：]\s*(.+)$")
-    for line in raw.splitlines():
-        m = pat.match(line.strip())
-        if m:
-            out.append({"name": m[1].strip(), "amount": m[2].strip()})
-    return jsonify(out or {"raw": raw})
+    try:
+        r = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers=HEADERS,
+            json={
+                "model": MODEL,
+                "messages": [{"role": "user", "content": prompt}],
+            },
+            timeout=30,
+        )
+        r.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        # 外部 API 側の一過性エラー。アプリ 500 にしない
+        return jsonify({"error": "llm_unavailable", "detail": str(e)}), 502
