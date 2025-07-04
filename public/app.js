@@ -146,7 +146,6 @@ const listUL=document.getElementById("shoppingList"),
       clearBtn=document.getElementById("clearBought");
 addListBtn.onclick = async () => {
   try {
-    // 1件ずつ個別にAPIへPOST
     for (const item of lastResults) {
       await api("/api/ingredients/add", {
         method: "POST",
