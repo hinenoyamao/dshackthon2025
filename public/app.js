@@ -144,13 +144,23 @@ function renderResults(arr){
 ===================================================== */
 const listUL=document.getElementById("shoppingList"),
       clearBtn=document.getElementById("clearBought");
-addListBtn.onclick=async()=>{
-  try{
-    await api("/api/ingredients/add",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:lastResults})});
+addListBtn.onclick = async () => {
+  try {
+    // 1件ずつ個別にAPIへPOST
+    for (const item of lastResults) {
+      await api("/api/ingredients/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: item.name, amount: item.amount })
+      });
+    }
     alert("追加 / 統合しました");
-    location.hash==="#list"?renderShopping():location.hash="#list";
-  }catch(err){alert(err.message);}
+    location.hash === "#list" ? renderShopping() : location.hash = "#list";
+  } catch (err) {
+    alert(err.message);
+  }
 };
+      
 
 async function renderShopping(){
   const list=await api("/api/ingredients");
