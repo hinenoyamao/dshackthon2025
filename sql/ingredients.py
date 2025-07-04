@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, g, abort
 from db import get_conn, put_conn
-from utils.amount import parse_amount
+from utils.amount import parse_amount, merge_amounts
 from .fridge import _auth_user
 
 bp = Blueprint("ingredients", __name__, url_prefix="/api/ingredients")
@@ -46,7 +46,7 @@ def add_ing():
 
     if row:
         # 既存の量に統合
-        new_amount = parse_amount(row[1], amount)
+        new_amount = merge_amounts(row[1], amount)
         cur.execute("UPDATE ingredients SET amount=%s, bought=false WHERE ingredients_id=%s",
                     (new_amount, row[0]))
     else:
