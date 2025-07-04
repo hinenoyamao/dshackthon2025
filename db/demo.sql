@@ -26,7 +26,7 @@ CREATE TABLE fridge (
                    REFERENCES users(user_id)
                    ON DELETE CASCADE,
     fridge_name   TEXT    NOT NULL,
-    fridge_amount NUMERIC,
+    fridge_amount TEXT,
     --  同ユーザーで同じ食材名は 1 行にする想定なら UNIQUE を推奨
     UNIQUE (user_id, fridge_name)
 );
