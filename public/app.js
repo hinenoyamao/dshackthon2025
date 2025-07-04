@@ -185,36 +185,46 @@ listUL.onchange=async e=>{
 clearBtn.onclick=()=>api("/api/ingredients/clearBought",{method:"DELETE"}).then(renderShopping);
 window.addEventListener("hashchange",()=>{if(location.hash==="#list")renderShopping();});
 
-/* =====================================================
+/* =============================
    7. 冷蔵庫リスト
-===================================================== */
-const invForm=document.getElementById("invForm"),
-      invName=document.getElementById("invName"),
-      invAmount=document.getElementById("invAmount"),
-      invList=document.getElementById("invList");
-async function renderInv(){
-  const data=await api("/api/fridge");
-  invList.innerHTML="";
-  data.forEach(it=>{
-    const li=document.createElement("li");
-    li.innerHTML=`<span>${it.name}: ${it.amount}</span>
-      <button data-id="${it.fridge_id}" class="del">&times;</button>`;
+============================= */
+const invForm   = document.getElementById("invForm"),
+      invName   = document.getElementById("invName"),
+      invAmount = document.getElementById("invAmount"),
+      invList   = document.getElementById("invList");
+
+async function renderInv() {
+  const data = await api("/api/fridge");   // [{ id, name, amount }, …]
+  invList.innerHTML = "";
+  data.forEach(it => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span>${it.name}: ${it.amount}</span>
+      <button class="del" data-id="${it.id}">&times;</button>`;
     invList.appendChild(li);
   });
 }
-invForm.onsubmit=async e=>{
+
+invForm.onsubmit = async e => {
   e.preventDefault();
-  const name=invName.value.trim(), amount=invAmount.value.trim();
-  if(!name||!amount){alert("食材名と量を入力してください");return;}
-  try{
-    await api("/api/fridge",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,amount})});
-    invForm.reset();renderInv();
-  }catch(err){alert(err.message);}
+  const name   = invName.value.trim();
+  const amount = invAmount.value.trim();
+  if (!name || !amount) { alert("食材名と量を入力してください"); return; }
+  await api("/api/fridge", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, amount })
+  });
+  invForm.reset();
+  renderInv();
 };
-invList.onclick=async e=>{
-  if(e.target.classList.contains("del")){
-    await api(`/api/fridge/${e.target.dataset.id}`,{method:"DELETE"});
-    renderInv();
-  }
+
+invList.onclick = async e => {
+  if (!e.target.classList.contains("del")) return;
+  await api(`/api/fridge/${e.target.dataset.id}`, { method: "DELETE" });
+  renderInv();
 };
-window.addEventListener("hashchange",()=>{if(location.hash==="#inventory")renderInv();});
+
+window.addEventListener("hashchange", () => {
+  if (location.hash === "#inventory") renderInv();
+});
