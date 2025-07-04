@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, g, abort
 from db import get_conn, put_conn
-from util import parse_amount
+from utils.amount import parse_amount
 from .fridge import _auth_user
 
 bp = Blueprint("ingredients", __name__, url_prefix="/api/ingredients")
