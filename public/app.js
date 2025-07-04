@@ -25,53 +25,69 @@ function setResult(html){
 /* ───────────────────────────────────
    2. ページ遷移 / Drawer
 ────────────────────────────────── */
-const pages=["login","signup","home","search","list","inventory"];
-function showPage(id){pages.forEach(p=>document.getElementById(p).classList.toggle("hidden",p!==id));location.hash="#"+id;}
- window.addEventListener("hashchange", ()=>ensureAuth());   // ← ensureAuth で描画も行う
+const pages = ["login","signup","home","search","list","inventory"];
 
-const drawer=document.getElementById("drawer"),
-      overlay=document.getElementById("overlay"),
-      menuBtn=document.getElementById("menuBtn");
-menuBtn.onclick=()=>toggleDrawer(!drawer.classList.contains("open"));
-overlay.onclick=()=>toggleDrawer(false);
-drawer.querySelectorAll("a").forEach(a=>a.onclick=()=>toggleDrawer(false));
+// ★① ハッシュが無い・不正なら必ず #login に
+if (!location.hash || !["#login","#signup","#home","#search","#list","#inventory"].includes(location.hash)){
+  location.hash = "#login";
+}
+
+function showPage(id){
+  pages.forEach(p =>
+    document.getElementById(p).classList.toggle("hidden", p !== id)
+  );
+  // location.hash の値は ensureAuth が責任をもって変更する
+}
+
+const drawer  = document.getElementById("drawer"),
+      overlay = document.getElementById("overlay"),
+      menuBtn = document.getElementById("menuBtn");
+menuBtn.onclick = () => toggleDrawer(!drawer.classList.contains("open"));
+overlay.onclick = () => toggleDrawer(false);
+drawer.querySelectorAll("a").forEach(a => a.onclick = () => toggleDrawer(false));
 function toggleDrawer(o){drawer.classList.toggle("open",o);overlay.classList.toggle("hidden",!o);}
 
 /* =====================================================
    3. 認証フロー
 ===================================================== */
-const userLabel=document.getElementById("userLabel"),
-      logoutBtn=document.getElementById("logoutBtn"),
-      loginForm=document.getElementById("loginForm"),
-      liName=document.getElementById("liName"),
-      liPass=document.getElementById("liPass"),
-      loginMsg=document.getElementById("loginMsg"),
-      signupForm=document.getElementById("signupForm"),
-      suName=document.getElementById("suName"),
-      suPass=document.getElementById("suPass"),
-      signupMsg=document.getElementById("signupMsg");
+const userLabel = document.getElementById("userLabel"),
+      logoutBtn = document.getElementById("logoutBtn"),
+      loginForm = document.getElementById("loginForm"),
+      liName    = document.getElementById("liName"),
+      liPass    = document.getElementById("liPass"),
+      loginMsg  = document.getElementById("loginMsg"),
+      signupForm= document.getElementById("signupForm"),
+      suName    = document.getElementById("suName"),
+      suPass    = document.getElementById("suPass"),
+      signupMsg = document.getElementById("signupMsg");
 
 /* 認証状態を取得して画面遷移 */
 async function ensureAuth(){
+
+  // ★② 通信の前に現在のハッシュで描画して“真っ白”回避
+  showPage((location.hash || "#login").slice(1));
+
   try{
-    const {user}=await api("/auth/me");
+    const { user } = await api("/auth/me");
     userLabel.textContent = user ? user.name : "ゲスト";
 
-    /* 必要ならハッシュを書き換えるだけ ―― ここでは描画しない */
-    if (!user && location.hash !== "#signup")            location.hash = "#login";
-    if ( user && (location.hash==="#login"||location.hash==="#signup"))
+    // ★③ 認証状態に応じてハッシュだけ変更（描画はまだ）
+    if (!user && location.hash !== "#signup")                 location.hash = "#login";
+    if ( user && (location.hash === "#login" || location.hash === "#signup"))
       location.hash = "#home";
 
-  }catch(e){
-    /* /auth/me が 401 やネットワークエラー → 未ログイン扱い */
+  }catch{
+    // /auth/me が失敗 → 未ログイン扱い
     location.hash = "#login";
   }finally{
-    /* どの分岐でも必ず現在のハッシュに合わせて描画 */
+    // ★④ ハッシュ確定後、もう一度 showPage して最終表示
     showPage((location.hash || "#login").slice(1));
   }
 }
 ensureAuth();
-window.addEventListener("hashchange",ensureAuth);
+
+// ★⑤ すべてのハッシュ変更は ensureAuth で処理
+window.addEventListener("hashchange", ensureAuth);
 
 /* サインアップ */
 signupForm.onsubmit=async e=>{
@@ -96,6 +112,12 @@ loginForm.onsubmit=async e=>{
 
 /* ログアウト */
 logoutBtn.onclick=()=>api("/auth/logout",{method:"POST"}).then(()=>{location.hash="#login";});
+logoutBtn.onclick = () =>
+  api("/auth/logout", { method: "POST" }).then(() => {
+    loginForm.reset();          // ← 追加 : ユーザー名・パスワードを空にする
+    loginMsg.textContent = "";  // （お好みで）前回エラーメッセージも消す
+    location.hash = "#login";
+  });
 
 /* =====================================================
    4. 使い方ガイド（モーダル）
