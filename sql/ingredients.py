@@ -28,19 +28,32 @@ def list_ing():
 @bp.route("/add", methods=["POST"])
 def add_ing():
     data = request.get_json()
-    name = data.get("name")
-    amount = data.get("amount")
+    if not data:
+        return jsonify({"error": "no data"}), 400
 
+    name = data.get("name", "").strip()
+    amount = data.get("amount", "").strip()
     if not name or not amount:
-        abort(400, description="Missing name or amount")
+        return jsonify({"error": "invalid input"}), 400
 
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("""
-        INSERT INTO ingredients(user_id, ingredients_name, amount, bought)
-        VALUES (%s, %s, %s, false)
-    """, (g.user["id"], name, amount))
+
+    # 同じ名前の食材があるか確認
+    cur.execute("SELECT ingredients_id, amount FROM ingredients WHERE user_id=%s AND ingredients_name=%s",
+                (g.user["id"], name))
+    row = cur.fetchone()
+
+    if row:
+        # 既存の量に統合
+        new_amount = parse_amount(row[1], amount)
+        cur.execute("UPDATE ingredients SET amount=%s, bought=false WHERE ingredients_id=%s",
+                    (new_amount, row[0]))
+    else:
+        # 新規挿入
+        cur.execute("INSERT INTO ingredients (user_id, ingredients_name, amount, bought) VALUES (%s, %s, %s, false)",
+                    (g.user["id"], name, amount))
+
     conn.commit()
     put_conn(conn)
-
-    return jsonify({"message": "Ingredient added successfully"}), 201
+    return jsonify({"status": "ok"})
