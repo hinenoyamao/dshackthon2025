@@ -72,11 +72,20 @@ input {
 }
 
 textarea:focus,
-input:focus {
-  background: #f9f7f2;   
+input:focus,
+textarea:focus-visible,
+input:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  box-shadow: 0 0 4px rgba(121 132 85 / 30%);
+  box-shadow: 0 0 4px rgba(121, 132, 85, 0.3);
+  background: #f9f7f2 !important;;               /* フォーカス時でも同色 */
+  -webkit-tap-highlight-color: transparent;
+}
+
+textarea:focus:-webkit-autofill,
+input:focus:-webkit-autofill {
+  transition: background-color 0s;
+  background: #f9f7f2 !important;
 }
 
 button {
@@ -306,6 +315,14 @@ header {
   transform: scale(1.05);
 }
 
+.info-btn:focus,
+.info-btn:focus-visible
+.info-btn:active{
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 4px rgba(121, 132, 85, 0.3);
+}
+
 /* ========================================
    Modal Dialog
    ======================================== */
@@ -323,7 +340,7 @@ header {
 
 .modal-content {
   width: 90%;
-  max-width: 540px;
+  max-width: 580px;
   height: 280px;
   padding: 30px 20px;
   border-radius: 12px;
