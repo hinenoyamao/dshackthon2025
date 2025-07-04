@@ -2,9 +2,10 @@ services:
   - type: web
     name: flask-backend
     env: python
+    runtime: python-3.11.6
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: python api.py
+    startCommand: gunicorn api:app
     envVars:
       - key: DATABASE_URL
         fromDatabase:
