@@ -113,8 +113,8 @@ from openai._base_client import SyncHttpxClientWrapper
 #  1. .env から環境変数を読む
 # ──────────────────────────────
 load_dotenv()
-API_KEY = os.getenv("API_KEY")              # OpenRouter の API キー
-MODEL   = "meta-llama/llama-4-maverick:free"
+API_KEY = os.getenv("API_KEY")  # OpenRouter の API キー
+MODEL = "meta-llama/llama-4-maverick:free"
 
 # ──────────────────────────────
 #  2. OpenRouter エンドポイント設定
@@ -137,21 +137,24 @@ app = Flask(__name__, static_folder="public", static_url_path="")
 # ログ設定（デバッグしやすいように）
 logging.basicConfig(level=logging.DEBUG)
 
+
 @app.route("/")
 def index():
     return app.send_static_file("index.html")
+
 
 app.register_blueprint(auth.bp)
 app.register_blueprint(fridge.bp)
 app.register_blueprint(ingredients.bp)
 app.register_blueprint(parse_recipe.bp)
 
+
 # ──────────────────────────────
 #  4. /parseRecipe エンドポイント
 # ──────────────────────────────
 @app.route("/parseRecipe", methods=["POST"])
 def handle_parse_recipe():
-    data   = request.get_json(force=True) or {}
+    data = request.get_json(force=True) or {}
     recipe = data.get("recipe", "").strip()
 
     if not recipe:
@@ -172,8 +175,8 @@ def handle_parse_recipe():
         # ランキング用メタ情報 (任意)
         "extra_headers": {
             "HTTP-Referer": "https://dshackthon.onrender.com",
-            "X-Title": "DSHackthonApp"
-        }
+            "X-Title": "DSHackthonApp",
+        },
     }
 
     try:
@@ -191,13 +194,13 @@ def handle_parse_recipe():
     for line in raw_reply.splitlines():
         m = pat.match(line.strip())
         if m:
-            result.append({"name": m.group(1).strip(),
-                           "amount": m.group(2).strip()})
+            result.append({"name": m.group(1).strip(), "amount": m.group(2).strip()})
 
-    if not result:                   # パース失敗時は生テキスト返却
+    if not result:  # パース失敗時は生テキスト返却
         return jsonify({"raw": raw_reply}), 200
 
     return jsonify(result), 200
+
 
 # ──────────────────────────────
 #  5. アプリ起動
