@@ -7,6 +7,9 @@
   --accent: #798455;  /* アクセントの抹茶グリーン */
   --text:   #333a46;  /* ベーステキスト */
   --sub:    #e9e8d9;  /* サブ背景／罫線 */
+
+  /* ★ 追加：カード最小幅（メディアクエリで利用） */
+  --card-min: 140px;
 }
 
 /* ========================================
@@ -18,33 +21,36 @@
   box-sizing: border-box;
 }
 
+html { scroll-behavior: smooth; }       /* ★ */
+
 body {
-  font-family: sans-serif;
+  font-family: system-ui, sans-serif;   /* ★ */
   background: var(--base);
   color: var(--text);
+  line-height: 1.6;                     /* ★ 可読性向上 */
 }
 
 h1 {
   margin: 10px 0;
   color: var(--accent);
   text-align: center;
+  font-size: clamp(1.4rem, 2.5vw, 2rem); /* ★ 画面幅で可変 */
 }
 
-.hidden { display: none; }
+.hidden { display: none !important; }
 .error  { margin-top: 10px; color: red; }
 
 /* ========================================
    Layout / Container
    ======================================== */
 .container {
-  width: 100%;
-  max-width: 600px;
-  margin: 70px auto 30px;
+  width: min(90%, 600px);               /* ★ 画面 90% か 600px の小さい方 */
+  margin: clamp(60px, 10vw, 90px) auto 30px;
   padding: 20px;
   background: var(--base);
   border: 1px solid var(--sub);
   border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 8px rgba(0 0 0 / 5%);
 }
 
 /* ========================================
@@ -60,23 +66,17 @@ input {
   border-radius: 16px;
   background: #f9f7f2;
   color: var(--text);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 6px rgba(0 0 0 / 5%);
+  transition: all .2s ease-in-out;
   height: 50px;
 }
 
-textarea:focus-visible,
-input:focus-visible {
+textarea:focus,
+input:focus {
+  background: #f9f7f2;   
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  box-shadow: 0 0 4px rgba(121, 132, 85, 0.3);
-}
-
-input:-webkit-autofill,
-textarea:-webkit-autofill {
-  background-color: #f9f7f2 !important; /* ← 背景をあなたの意図した色に強制上書き */
-  -webkit-box-shadow: 0 0 0px 1000px #f9f7f2 inset !important; /* ← 自動補完の水色背景を潰す技 */
-  color: var(--text) !important;
+  box-shadow: 0 0 4px rgba(121 132 85 / 30%);
 }
 
 button {
@@ -87,22 +87,22 @@ button {
   background: var(--main);
   color: #fff;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity .2s;
 }
 
-button:hover         { opacity: 0.9; }
+button:hover       { opacity: .9; }
 button:focus,
 button:focus-visible,
-button:active {                 /* ← 追加（クリック押下中も対象） */
-   outline: 2px solid var(--main);   /* main色のオレンジ枠 */
-   outline-offset: 2px;
-   box-shadow: 0 0 4px rgba(246, 143, 102, 0.3);
- }
+button:active {
+  outline: 2px solid var(--main);
+  outline-offset: 2px;
+  box-shadow: 0 0 4px rgba(246 143 102 / 30%);
+}
 
 /* ▼ サインイン／サインアップのユーザー名入力欄だけ背景色を揃える */
-#liName,          /* サインイン画面のユーザー名 */
-#suName {         /* サインアップ画面のユーザー名 */
-  background: #f9f7f2 ;   /* 既に password に使っている色 */
+#liName,
+#suName {
+  background: #f9f7f2;
 }
 
 /* ========================================
@@ -113,15 +113,11 @@ button:active {                 /* ← 追加（クリック押下中も対象�
   padding: 10px;
   border-radius: 5px;
   background: transparent;
-  transition: background 0.3s ease;
+  transition: background .3s ease;
 }
 
-/* 結果があるときだけ背景と余白つきで表示 */
-.result-box:not(.active) {
-  display: none;
-}
-
-.result-box.active { background: #f9f7f2; } /* 結果あり：薄い生成り */
+.result-box:not(.active) { display: none; }
+.result-box.active       { background: #f9f7f2; }
 
 .result-box ul { padding-left: 20px; }
 .result-box li { margin-bottom: 5px; }
@@ -131,21 +127,26 @@ button:active {                 /* ← 追加（クリック押下中も対象�
    ======================================== */
 header {
   position: fixed;
+  inset-inline: 0;
   top: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
+  height: 56px;                             /* ★ 微調整 */
   background: var(--base);
   border-bottom: 1px solid var(--sub);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 15px;
+  padding-inline: clamp(10px, 4vw, 20px);   /* ★ 可変パディング */
   z-index: 1000;
 }
 
-.logo   { font-weight: bold; color: var(--main); text-decoration: none; }
-#menuBtn{
+.logo {
+  font-weight: 700;
+  font-size: 1.1rem;                        /* ★ */
+  color: var(--main);
+  text-decoration: none;
+}
+
+#menuBtn {
   all: unset;
   font-size: 24px;
   color: var(--main);
@@ -159,15 +160,14 @@ header {
    ======================================== */
 .drawer {
   position: fixed;
-  top: 0;
+  top: 0; bottom: 0;
   right: 0;
-  width: 250px;
-  height: 100%;
+  width: clamp(220px, 70%, 280px);          /* ★ スマホ時は画面幅 70% */
   background: var(--base);
   border-left: 1px solid var(--sub);
-  box-shadow: -4px 0 8px rgba(0, 0, 0, 0.05);
+  box-shadow: -4px 0 8px rgba(0 0 0 / 5%);
   transform: translateX(100%);
-  transition: transform 0.25s ease-out;
+  transition: transform .25s ease-out;
   z-index: 999;
   padding: 80px 20px 20px;
   display: flex;
@@ -190,7 +190,7 @@ header {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0 0 0 / 30%);
   z-index: 998;
 }
 
@@ -198,10 +198,12 @@ header {
    Home Cards
    ======================================== */
 .home-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
+  --min: var(--card-min);                   /* ★ */
+  display: flex;        /* ← grid をやめて flex に */
+  flex-direction: column;
+  gap: 15px;            /* カード同士の縦の間隔 */
   margin-top: 20px;
+  grid-auto-flow: row;
 }
 
 .home-card {
@@ -214,14 +216,14 @@ header {
   font-weight: bold;
   font-size: 18px;
   border-radius: 20px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 6px rgba(0 0 0 / 5%);
   text-decoration: none;
-  transition: background 0.2s, box-shadow 0.2s;
+  transition: background .2s, box-shadow .2s;
 }
 
 .home-card:hover {
   background: #e67e58;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0 0 0 / 10%);
 }
 
 /* ========================================
@@ -254,7 +256,7 @@ header {
   background: #fff;
   position: relative;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition: background .2s, border-color .2s;
 }
 
 #shoppingList li input[type="checkbox"]:checked {
@@ -265,8 +267,7 @@ header {
 #shoppingList li input[type="checkbox"]:checked::after {
   content: "✓";
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   color: #fff;
   font-size: 14px;
@@ -283,10 +284,8 @@ header {
    ======================================== */
 .info-btn {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 48px;
-  height: 48px;
+  bottom: 20px; right: 20px;
+  width: 48px; height: 48px;
   border-radius: 50%;
   background: var(--accent);
   color: #fff;
@@ -298,20 +297,13 @@ header {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-  transition: transform 0.2s, background 0.2s;
+  box-shadow: 0 4px 10px rgba(0 0 0 / 12%);
+  transition: transform .2s, background .2s;
 }
 
 .info-btn:hover {
   background: #8e9a61;
   transform: scale(1.05);
-}
-.info-btn:focus,
-.info-btn:focus-visible
-.info-btn:active{
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  box-shadow: 0 0 4px rgba(121, 132, 85, 0.3);
 }
 
 /* ========================================
@@ -320,7 +312,7 @@ header {
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0 0 0 / 40%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -332,11 +324,11 @@ header {
 .modal-content {
   width: 90%;
   max-width: 540px;
-  height: 280px; /* 固定高さで各ページ統一 */
+  height: 280px;
   padding: 30px 20px;
   border-radius: 12px;
   background: var(--base);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0 0 0 / 15%);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -344,48 +336,60 @@ header {
 
 .modal-close {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 10px; right: 10px;
   background: none;
 }
-.slides{
-  flex:1;                /* ナビ以外の余白をすべて占有 */
-  overflow:hidden;       /* 内部スクロールは子要素で */
+
+.slides     { flex: 1; overflow: hidden; }
+.slides .slide {
+  display: none;
+  height: 100%;
+  overflow-y: auto;
+}
+.slides .slide.active{ display: block; }
+.slides .slide h2   { margin: 0 0 12px; }
+
+.modal-nav {
+  margin-top: 20px;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
 }
 
-.slides .slide{
-  display:none;
-  height:100%;           /* スライド高さも統一 */
-  overflow-y:auto;       /* 長文の場合だけスクロール */
-}
-
-.slides .slide.active{display:block;}
-
-.slides .slide h2{
-  margin:0 0 12px;       /* 見出し上部を揃える */
-}
-
-.modal-nav{
-  margin-top:20px;
-  display:flex;
-  gap:20px;
-  justify-content:center;
-  align-items:center;
-}
 .modal-nav button{
-  all:unset;
-  font-size:20px;
-  cursor:pointer;
-  color:var(--accent);
-  padding:6px 10px;
-  border-radius:8px;
+  all: unset;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--accent);
+  padding: 6px 10px;
+  border-radius: 8px;
 }
-.modal-nav button:hover{
-  background:#f9f7f2;
+.modal-nav button:hover   { background: #f9f7f2; }
+.modal-nav button:disabled{ opacity: .3; cursor: default; }
+
+#slideIndicator { font-weight: bold; }
+
+/* ========================================
+   Responsive – max-width: 600 px
+   ======================================== */
+@media (max-width: 600px){
+  .container { padding: 16px; }
+  textarea, input { font-size: 14px; height: 44px; }
+  button { width: 100%; }
+  .home-card { height: 90px; font-size: 16px; }
+
+  #shoppingList li label,
+  #invList li span { font-size: 14px; }
+
+  #menuBtn { font-size: 22px; }
 }
-.modal-nav button:disabled{
-  opacity:.3;cursor:default;
-}
-#slideIndicator{
-  font-weight:bold;
+
+/* ========================================
+   Responsive – min-width: 900 px
+   ======================================== */
+@media (min-width: 900px){
+  body        { font-size: 18px; }
+  .container  { max-width: 720px; }
+  .home-grid  { --min: 180px; }
 }
