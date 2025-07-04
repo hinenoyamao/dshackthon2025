@@ -15,11 +15,13 @@ os.environ.pop("HTTPS_PROXY", None)
 API_KEY = os.getenv("API_KEY")
 MODEL = "meta-llama/llama-4-maverick:free"  # 安定性高めのモデルに変更
 
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=API_KEY,
-    http_client=SyncHttpxClientWrapper(),
-)
+# 追加
+API_URL = "https://openrouter.ai/api/v1/chat/completions"
+HEADERS = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json",
+}
+
 logging.basicConfig(level=logging.DEBUG)
 
 # APIのセットアップしてる(apikeyはenvファイルで管理してるのでenvファイル持ってなきゃそもそも使えない)
@@ -63,26 +65,21 @@ def handle_parse_recipe():
 
     # これでAPIにプロンプト投げる準備
     # payload = {"model": MODEL, "messages": [{"role": "user", "content": prompt}]}
-    completion = client.chat.completions.create(
-        model=MODEL,
-        messages=[
-            {"role": "user", "content": prompt}
-        ],
-        extra_headers={
-            "HTTP-Referer": "https://dshackthon.onrender.com",
-            "X-Title": "DSHackthonApp"
-        }
-    )
-    raw_reply = completion.choices[0].message.content
+    payload = {
+    "model": MODEL,
+    "messages": [{"role": "user", "content": prompt}]
+    }
+    try:
+        response = requests.post(API_URL, headers=HEADERS, json=payload, timeout=30)
+        response.raise_for_status()
+        raw_reply = response.json()["choices"][0]["message"]["content"]
+    except Exception as e:
+        return jsonify({"error": f"LLM API error: {str(e)}"}), 502
     # #　APIに投げるtryが200以外ならexceptに入る
-    # print("📩 RECIPE:", recipe)
-    # print("🛰️ PROMPT:", prompt)
-    # print("📦 PAYLOAD:", payload)
     # try:
     #     r = requests.post(API_URL, headers=HEADERS, json=payload, timeout=30)
     #     r.raise_for_status()
     # except requests.RequestException as e:
-    #     print("❌ LLM API ERROR:", e)
     #     return jsonify({"error": f"LLM API error: {e}"}), 502
 
     # # 出力結果のテキストだけを変数に入れる。
