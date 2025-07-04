@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 import requests, os, re
 from dotenv import load_dotenv
 from sql import auth, fridge, ingredients, parse_recipe
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 # APIのセットアップしてる(apikeyはenvファイルで管理してるのでenvファイル持ってなきゃそもそも使えない)
 load_dotenv()
@@ -46,10 +48,14 @@ def handle_parse_recipe():
     payload = {"model": MODEL, "messages": [{"role": "user", "content": prompt}]}
 
     #　APIに投げるtryが200以外ならexceptに入る
+    print("📩 RECIPE:", recipe)
+    print("🛰️ PROMPT:", prompt)
+    print("📦 PAYLOAD:", payload)
     try:
         r = requests.post(API_URL, headers=HEADERS, json=payload, timeout=30)
         r.raise_for_status()
     except requests.RequestException as e:
+        print("❌ LLM API ERROR:", e)
         return jsonify({"error": f"LLM API error: {e}"}), 502
 
     # 出力結果のテキストだけを変数に入れる。
