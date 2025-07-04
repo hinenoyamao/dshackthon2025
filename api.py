@@ -1,10 +1,10 @@
-# from flask import Flask, request, jsonify
-# import requests, os, re
-# from dotenv import load_dotenv
-# from sql import auth, fridge, ingredients, parse_recipe
-# import logging
-# from openai import OpenAI
-# from openai._base_client import SyncHttpxClientWrapper
+from flask import Flask, request, jsonify
+import requests, os, re
+from dotenv import load_dotenv
+from sql import auth, fridge, ingredients, parse_recipe
+import logging
+from openai import OpenAI
+from openai._base_client import SyncHttpxClientWrapper
 
 
 # os.environ.pop("http_proxy", None)
@@ -109,10 +109,6 @@
 #     port = int(os.getenv("PORT", 5000))
 #     app.run(host="0.0.0.0", port=port, debug=True)
 
-from flask import Flask, request, jsonify
-import os, re, requests, logging
-from dotenv import load_dotenv
-
 # ──────────────────────────────
 #  1. .env から環境変数を読む
 # ──────────────────────────────
@@ -144,6 +140,11 @@ logging.basicConfig(level=logging.DEBUG)
 @app.route("/")
 def index():
     return app.send_static_file("index.html")
+
+app.register_blueprint(auth.bp)
+app.register_blueprint(fridge.bp)
+app.register_blueprint(ingredients.bp)
+app.register_blueprint(parse_recipe.bp)
 
 # ──────────────────────────────
 #  4. /parseRecipe エンドポイント
